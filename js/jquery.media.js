@@ -23,21 +23,35 @@
                     dancer = new Dancer();
                     dancer
                         .load(audio)
-                        .onceAt(22, function() {
-                            self.demo.$preintro.tweenViewport()
+                        .onceAt(0, function() {
+                            console.log('start intro');
+                            self.demo.$intro.start();
                         })
-                        .onceAt(44, function() {
-                            self.demo.second_run();
+                        .onceAt(23.2, function() {
+                            console.log('end intro, start beat')
                         })
-                        .onceAt(175, function() {
-                            console.log('triggering stop-hellnight');
-                            $('#body_container').trigger('stop-hellnight');
+                        .onceAt(46.3, function() {
+                            console.log('end intro, start tune1')
                         })
-                        .onceAt(218, function() {
-                            if ($('div.iframe').is(":visible")) {
-                                $('#body_container').trigger('visual-done');
-                            }
-                        });
+                        .onceAt(69.6, function() {
+                            console.log('end tune1, start tune2')
+                        })
+                        .onceAt(92.7, function() {
+                            console.log('end tune2, start tune3')
+                        })
+                        .onceAt(115.8, function() {
+                            console.log('end tune3, start tune4')
+                        })
+                        .onceAt(138.9, function() {
+                            console.log('end tune4, start outro1')
+                        })
+                        .onceAt(150.5, function() {
+                            console.log('end outro1, start outro2')
+                        })
+                        .onceAt(162.4, function() {
+                            console.log('end outro2')
+                        })
+                    ;
 
                     if (dancer.isLoaded()) {
                         dancer.play();

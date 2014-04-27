@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Kl3m - Outline 2013</title>
+    <title>Outline 2015</title>
     <meta charset="utf-8">
+    <link href="less/style.less" rel="stylesheet/less" type="text/css" media="screen,projection" />
+    <script src="js/less-1.4.1.min.js"></script>
     <script src="js/modernizr.custom.50055.js"></script>
-    <script src="http://www.webglearth.com/api.js"></script>
 </head>
 <body>
 <script>
     Modernizr.load([
-        'css/style.css',
         'css/animate-custom.css',
         'js/jquery-1.9.1.min.js',
         'js/jquery.gradienttext-0.1.min.js',
+        'js/jquery.textillate.js',
+        'js/jquery.lettering-0.6.1.min.js',
         'js/tween.min.js',
         'js/Sparks.js',
         'js/jquery.intro.js',
@@ -24,19 +26,14 @@
 </script>
 <div class="body" id="body_container">
     <audio controls="none" style="display: none" id="audio">
-        <source src="track/track-2.ogg" type="audio/ogg" />
+        <source src="track/track.ogg" type="audio/ogg" />
         <source src="track/track.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
     </audio>
-    <h1 class="header"></h1>
-    <div class="content"></div>
-    <div class="earth" id="earth_div"></div>
-    <div class="img"></div>
-    <div class="wm">
-        <img alt="" />
-    </div>
 </div>
-<div class="iframe"></div>
+<div class="intro">
+    <canvas id="intro_canv" width="1000px" height="800px" style="position:relative; top:0; left:0;">Canvas Not supported, sorry.</canvas>
+</div>
 <div class="outro">
     <div id="atari">
         <div class="monitor">
@@ -103,7 +100,5 @@
         </p>
     </div>
 </div>
-<div class="time"></div>
-<canvas id="sprite_canvas" width="400" height="200"></canvas>
 </body>
 </html>

@@ -1,0 +1,75 @@
+@font-face {
+  font-family: "Atari";
+  src: url(../fonts/AtariST8x16SystemFont.ttf);
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: Atari;
+  background-color: #000;
+  div.body, div.intro {
+    width: 1000px;
+    height: 800px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+  }
+
+  div.intro {
+  }
+
+  div.body {
+    background-color: #fff;
+    text-align: center;
+    display: none;
+    z-index: 0;
+  }
+
+  /*
+    Outro
+  */
+  div.outro {
+    opacity: 0;
+  }
+
+  div.outro-text {
+    color: #fff;
+    position: fixed;
+    top: 330px;
+    width: 800px;
+    height: 100%;
+    z-index: 20;
+
+    span {
+      visibility: hidden;
+    }
+
+    p {
+      visibility: hidden;
+      clear: both;
+      padding-bottom: 22px;
+      margin-bottom: 40px;
+
+      span.title {
+        visibility: hidden;
+        width: 400px;
+        display: inline-block;
+      }
+
+      span.value {
+        visibility: hidden;
+        width: 400px;
+        text-align: right;
+        display: inline-block;
+        float: right;
+      }
+    }
+
+  }
+
+}
+
