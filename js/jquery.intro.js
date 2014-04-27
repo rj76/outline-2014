@@ -1,124 +1,72 @@
 (function ($) {
-    $.intro = function(demo) {
+    var freq = .1,
+        amp = 10,
+        canvas = document.getElementById("intro_canv"),
+        canvas_hidden = document.getElementById("intro_canv_hidden"),
+        ctx = canvas.getContext("2d"),
+        ctx_hidden = canvas_hidden.getContext("2d"),
+        w = canvas.width,
+        h = canvas.height,
+        x = w / 2,
+        y = h / 2,
+        top=100
+        ;
+
+    $.intro = function (demo) {
         this.demo = demo;
     };
 
-    $.intro.prototype.start = function() {
+    $.intro.prototype.start = function () {
         var
-            self=this,
-            freq=.3,
-            amp=10,
-            canvas=document.getElementById("intro_canv"),
-            ctx = canvas.getContext("2d")
+            self = this
             ;
 
-        ctx.font = "24px Atari";
+        // array text => duration
+        var text = {
+            "G'day fellow outliners": 2000,
+            "This is a small demo": 2000,
+            "as a tribute to the one game we all love": 2000,
+            "(I really tried not to screw it up)": 2000,
+            "(with this being my first demo and all)": 1600
+        };
+
+
+        ctx.font = "36px Atari";
+        ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
+        ctx.fillText("G'day fellow outliners", x, top);
 
+        animate();
+    };
 
-        $('h1.header').one('show-h1-1', function() {
-            $('h1.header').html("G'day fellow outliners")
-                .textillate({
-                    in: {
-                        effect: 'fadeInLeftBig',
-                        duration: 1000,
-                        done: function() {
-                            $('h1.header').fadeTo(500, 0, function() {
-                                h2();
-                            });
-                        }
-                    }
-                })
-        });
+    var _x=0, _y=top, printed= 0, counter=0;
+    function animate() {
+        requestAnimationFrame(animate);
+        var d = ctx.getImageData(0, 0, w, h);
+        if (_x++>w) _x=0;
+        if (_y++>h) _y=top;
+        counter++;
+        var idx = 4*(_x+_y*w);
+//        if (d.data[idx] == 0 && d.data[idx+1] == 0 && d.data[idx+2] == 0 && d.data[idx+3] == 0) {
+//            d.data[idx] = d.data[idx];
+//            d.data[idx+1] = d.data[idx+1];
+//            d.data[idx+2] = d.data[idx+2];
+//            d.data[idx+3] = d.data[idx+3];
+//        } else {
+            // now we have to transpose a new y, calc a new position, and put the old data in there
+            var new_x = Math.abs(Math.sin(freq*counter)*amp)+_x, new_idx=Math.round(4*(new_x+_y*w));
+            if (printed++<50) console.log([_x, new_x, idx, new_idx]);
+            d.data[new_idx] = d.data[idx];
+            d.data[new_idx+1] = d.data[idx+1];
+            d.data[new_idx+2] = d.data[idx+2];
+            d.data[new_idx+3] = d.data[idx+3];
+            d.data[idx] = 0;
+            d.data[idx+1] = 0;
+            d.data[idx+2] = 0;
+            d.data[idx+3] = 0;
+//        }
 
-        function h2() {
-            $('h1.header').replaceWith('<h1 class="header"></h1>').fadeTo(100, 1, function() {
-                $('h1.header').html('This is a small demo').textillate({
-                    in: {
-                        effect: 'fadeInLeftBig',
-                        duration: 2000,
-                        done: function() {
-                            $('h1.header').fadeTo(500, 0, function() {
-                                h3();
-                            });
-                        }
-                    }
-                });
-            });
-        }
-
-        function h3() {
-            $('h1.header').replaceWith('<h1 class="header"></h1>').fadeTo(100, 1, function() {
-                $('h1.header').html('as a tribute to the one game we all love')
-                .textillate({
-                    in: {
-                        effect: 'fadeInLeftBig',
-                        duration: 2000,
-                        done: function() {
-                            $('h1.header').fadeTo(500, 0, function() {
-                                h4();
-                            });
-                        }
-                    }
-                })
-            });
-        }
-
-        function h4() {
-            $('h1.header').replaceWith('<h1 class="header"></h1>').fadeTo(100, 1, function() {
-                $('h1.header').html('(I really tried not to screw it up)')
-                .textillate({
-                    in: {
-                        effect: 'fadeInLeftBig',
-                        duration: 2000,
-                        done: function() {
-                            $('h1.header').fadeTo(500, 0, function() {
-                                h5();
-                            });
-                        }
-                    }
-                })
-            });
-        }
-
-        function h5() {
-            $('h1.header').replaceWith('<h1 class="header"></h1>').fadeTo(100, 1, function() {
-                $('h1.header').html('(with this being my first demo and all)')
-                .textillate({
-                    in: {
-                        effect: 'fadeInLeftBig',
-                        duration: 1600,
-                        done: function() {
-                            $('h1.header').fadeTo(500, 0, function() {
-                                show_svs();
-                            });
-                        }
-                    }
-                });
-            });
-        }
-
-        function show_svs() {
-            $('h1.header').replaceWith('<h1 class="header"></h1>').fadeTo(100, 1, function() {
-                $('h1.header').html('Spy vs. Spy')
-                .textillate({
-                    in: {
-                        effect: 'fadeInLeftBig',
-                        duration: 1600,
-                        done: function() {
-                            $('div.intro').fadeOut(function() {
-                                $('h1.header').css('color', '#000');
-                                $('div.intro').css('background-image', 'url("img/svs-sm.png")');
-                                $('div.intro').fadeIn();
-                            })
-                        }
-                    }
-                });
-            });
-        }
-
-        // fire it
-        $('h1.header').trigger('show-h1-1');
-
+        ctx.clearRect(0, 0, w, h);
+        ctx.putImageData(d, 0, 0);
     }
 }(jQuery));
