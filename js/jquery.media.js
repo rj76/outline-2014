@@ -25,7 +25,7 @@
                         .load(audio)
                         .onceAt(0, function() {
                             console.log('start intro');
-                            self.demo.$intro.start();
+//                            self.demo.$intro.start();
                         })
                         .onceAt(23.2, function() {
                             console.log('end intro, start beat')
@@ -55,7 +55,7 @@
 
                     if (dancer.isLoaded()) {
                         dancer.play();
-                        dancer.setVolume(0);
+//                        dancer.setVolume(0);
                         deferred.resolve();
                         $('#audio').bind('ended', function() {
                             $('div.outro').fadeOut();
