@@ -14,11 +14,6 @@
         Modernizr.load({
             load: [
                 'js/dancer/dancer.js',
-                'js/dancer/adapterWebAudio.js',
-                'js/dancer/adapterMoz.js',
-                'js/dancer/support.js',
-//                'js/dancer/kick.js',
-//                'js/dancer/fft.js'
                 ],
             complete: function() {
                 try {

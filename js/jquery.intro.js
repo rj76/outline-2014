@@ -1,5 +1,5 @@
 (function ($) {
-    var freq = .03,
+    var freq = .01,
         amp = 8,
         canvas = document.getElementById("intro_canv"),
         canvas_hidden = document.getElementById("intro_canv_hidden"),
@@ -11,9 +11,17 @@
         css_font="42px Atari",
         y_min = 100,
         d,
-        do_run=true,
-        a=255
-        ;
+        a=255,
+        dancer,
+        texts = [
+            "G'day fellow outliners",
+            "This is a small demo",
+            "as a tribute to the one game we all love",
+            "(I really tried not to screw it up)",
+            "(with this being my first demo and all)"
+        ],
+        txt_idx=0
+    ;
 
     $.intro = function (demo) {
         this.demo = demo;
@@ -25,13 +33,9 @@
             ;
 
         // array text => duration
-        var text = {
-            "G'day fellow outliners": 2000,
-            "This is a small demo": 2000,
-            "as a tribute to the one game we all love": 2000,
-            "(I really tried not to screw it up)": 2000,
-            "(with this being my first demo and all)": 1600
-        };
+        var
+
+        dancer = $('div.body').data('dancer');
 
         ctx.fillStyle = '#000'; // set canvas background color
         ctx.fillRect(0, 0, w, h);  // now fill the canvas
@@ -42,31 +46,18 @@
         ctx_hidden.font = css_font;
         ctx_hidden.fillStyle = '#fff';
         ctx_hidden.textAlign = 'center';
-        clearAndSetText("G'day fellow outliners");
+
+        setNextText();
 
         animate();
-
-        _.delay(function() {
-            do_run = false;
-            clearAndSetText("This is a small demo");
-            do_run = true;
-            _.delay(function() {
-                do_run = false;
-                clearAndSetText("as a tribute to the one game we all love");
-                do_run = true;
-                _.delay(function() {
-                    do_run = false;
-                    clearAndSetText("(I really tried not to screw it up)");
-                    do_run = true;
-                    _.delay(function() {
-                        do_run = false;
-                        clearAndSetText("(with this being my first demo and all)");
-                        do_run = true;
-                    }, 2400);
-                }, 3500);
-            }, 3500);
-        }, 3500);
     };
+
+    function setNextText() {
+        if (txt_idx<texts.length) {
+            clearAndSetText(texts[txt_idx++]);
+            setTimeout(setNextText, 4000);
+        }
+    }
 
     function clearAndSetText(txt) {
         ctx.clearRect(0, 0, w, h);
@@ -74,15 +65,15 @@
         ctx_hidden.fillText(txt, x, y_min);
     }
 
-    var counter=0;
+    var counter= 0, old_time= 0, printed=0;
     function animate() {
         d = ctx_hidden.getImageData(0, 0, w, h);
-        var d1 = ctx_hidden.getImageData(0, 0, w, h);
+        var d1 = ctx_hidden.getImageData(0, 0, w, h), audio_freq=window.Dancer.getFrequency(10,50);
         counter++;
         var old_sin= 0;
         for(var _y=0;_y<h;++_y) {
             var
-                new_sin = Math.sin(freq * (counter+_y)) * amp
+                new_sin = Math.sin((freq+10*audio_freq) * (counter+_y)) * amp
             ;
             old_sin = new_sin;
             for (var _x= 0,idx= 0;_x<w;idx=4*(++_x + _y*w)) {
@@ -109,6 +100,8 @@
 
         ctx.clearRect(0, 0, w, h);
         ctx.putImageData(d1, 0, 0);
+
+
 
         requestAnimationFrame(animate);
     }
