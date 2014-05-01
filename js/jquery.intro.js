@@ -1,6 +1,6 @@
 (function ($) {
-    var freq = .09,
-        amp = 4,
+    var freq = .03,
+        amp = 8,
         canvas = document.getElementById("intro_canv"),
         canvas_hidden = document.getElementById("intro_canv_hidden"),
         ctx = canvas.getContext("2d"),
@@ -9,9 +9,9 @@
         h = canvas.height,
         x = w / 2,
         css_font="42px Atari",
-        y_min = 100, y_max=0,
+        y_min = 100,
         d,
-        do_run=false,
+        do_run=true,
         a=255
         ;
 
@@ -33,39 +33,6 @@
             "(with this being my first demo and all)": 1600
         };
 
-        clearAndSetText("G'day fellow outliners");
-
-//        animate();
-
-//        _.delay(function() {
-//            do_run = true;
-//            _.delay(function() {
-//                do_run = false;
-//                clearAndSetText("This is a small demo");
-//                do_run = true;
-//                _.delay(function() {
-//                    do_run = false;
-//                    clearAndSetText("as a tribute to the one game we all love");
-//                    do_run = true;
-//                    _.delay(function() {
-//                        do_run = false;
-//                        clearAndSetText("(I really tried not to screw it up)");
-//                        do_run = true;
-//                        _.delay(function() {
-//                            do_run = false;
-//                            clearAndSetText("(with this being my first demo and all)");
-//                            do_run = true;
-//                        }, 2400);
-//                    }, 3500);
-//                }, 3500);
-//            }, 3500);
-//        }, 500);
-    };
-
-    function clearAndSetText(txt) {
-        ctx.clearRect(0, 0, w, h);
-        ctx_hidden.clearRect(0, 0, w, h);
-
         ctx.fillStyle = '#000'; // set canvas background color
         ctx.fillRect(0, 0, w, h);  // now fill the canvas
 
@@ -75,6 +42,35 @@
         ctx_hidden.font = css_font;
         ctx_hidden.fillStyle = '#fff';
         ctx_hidden.textAlign = 'center';
+        clearAndSetText("G'day fellow outliners");
+
+        animate();
+
+        _.delay(function() {
+            do_run = false;
+            clearAndSetText("This is a small demo");
+            do_run = true;
+            _.delay(function() {
+                do_run = false;
+                clearAndSetText("as a tribute to the one game we all love");
+                do_run = true;
+                _.delay(function() {
+                    do_run = false;
+                    clearAndSetText("(I really tried not to screw it up)");
+                    do_run = true;
+                    _.delay(function() {
+                        do_run = false;
+                        clearAndSetText("(with this being my first demo and all)");
+                        do_run = true;
+                    }, 2400);
+                }, 3500);
+            }, 3500);
+        }, 3500);
+    };
+
+    function clearAndSetText(txt) {
+        ctx.clearRect(0, 0, w, h);
+        ctx_hidden.clearRect(0, 0, w, h);
         ctx_hidden.fillText(txt, x, y_min);
     }
 
@@ -86,7 +82,7 @@
         var old_sin= 0;
         for(var _y=0;_y<h;++_y) {
             var
-                new_sin = Math.round(((Math.sin(freq * (counter+_y)) * amp)*100)/100)
+                new_sin = Math.sin(freq * (counter+_y)) * amp
             ;
             old_sin = new_sin;
             for (var _x= 0,idx= 0;_x<w;idx=4*(++_x + _y*w)) {
@@ -114,6 +110,6 @@
         ctx.clearRect(0, 0, w, h);
         ctx.putImageData(d1, 0, 0);
 
-        if (do_run) requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
     }
 }(jQuery));

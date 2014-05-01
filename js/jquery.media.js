@@ -13,19 +13,20 @@
 
         Modernizr.load({
             load: [
-                'js/dancer/dancer.min.js',
-                'js/dancer/kick.js',
-                'js/dancer/adapterWebkit.js',
-                'js/dancer/adapterMoz.js'
+                'js/dancer/dancer.js',
+                'js/dancer/adapterWebAudio.js',
+                'js/dancer/adapterMoz.js',
+                'js/dancer/support.js',
+//                'js/dancer/kick.js',
+//                'js/dancer/fft.js'
                 ],
             complete: function() {
                 try {
                     dancer = new Dancer();
                     dancer
-                        .load(audio)
                         .onceAt(0, function() {
                             console.log('start intro');
-//                            self.demo.$intro.start();
+                            self.demo.$intro.start();
                         })
                         .onceAt(23.2, function() {
                             console.log('end intro, start beat')
@@ -51,17 +52,13 @@
                         .onceAt(162.4, function() {
                             console.log('end outro2')
                         })
+                        .load(audio)
                     ;
 
                     if (dancer.isLoaded()) {
                         dancer.play();
 //                        dancer.setVolume(0);
                         deferred.resolve();
-                        $('#audio').bind('ended', function() {
-                            $('div.outro').fadeOut();
-//                            window.clearInterval(int);
-                        });
-
                         $('div.body').data('dancer', dancer);
                     } else {
                     }
