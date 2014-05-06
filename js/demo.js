@@ -12,11 +12,6 @@
         this.$media = new $.media(this);
         this.$intro = new $.intro(this);
         this.$outro = new $.outro(this);
-
-        $('div.body').on('start-sprite', function() {
-            self.$sprite.start();
-        });
-
     };
 
     $.demo.prototype.run = function () {
@@ -26,8 +21,10 @@
         $.when(self.$media.start()).then(function () {});
     };
 
-    var $demo = new $.demo();
-    $demo.init();
-    $demo.run();
+    window.demo = new $.demo();
+    window.effects = new $.effects();
+
+    window.demo.init();
+    window.demo.run();
 
 }(jQuery));

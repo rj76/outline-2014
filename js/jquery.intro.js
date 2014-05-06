@@ -12,15 +12,15 @@
         y_min = 100,
         d,
         a=255,
-        dancer,
         texts = [
             "G'day fellow outliners",
             "This is a small demo",
             "as a tribute to the one game we all love",
-            "(I really tried not to screw it up)",
-            "(with this being my first demo and all)"
+            "(I really tried not to screw it up)"
         ],
-        txt_idx=0
+        wait=18/texts.length,
+        txt_idx= 0,
+        alpha
     ;
 
     $.intro = function (demo) {
@@ -32,20 +32,11 @@
             self = this
             ;
 
-        // array text => duration
-        var
-
-        dancer = $('div.body').data('dancer');
-
         ctx.fillStyle = '#000'; // set canvas background color
         ctx.fillRect(0, 0, w, h);  // now fill the canvas
 
         ctx_hidden.fillStyle = '#000'; // set canvas background color
         ctx_hidden.fillRect(0, 0, w, h);  // now fill the canvas
-
-        ctx_hidden.font = css_font;
-        ctx_hidden.fillStyle = '#fff';
-        ctx_hidden.textAlign = 'center';
 
         setNextText();
 
@@ -53,19 +44,23 @@
     };
 
     function setNextText() {
+        txt_idx++;
         if (txt_idx<texts.length) {
-            clearAndSetText(texts[txt_idx++]);
-            setTimeout(setNextText, 4000);
+            clearAndSetText(texts[txt_idx]);
+            setTimeout(setNextText, wait*1000);
         }
     }
 
     function clearAndSetText(txt) {
         ctx.clearRect(0, 0, w, h);
         ctx_hidden.clearRect(0, 0, w, h);
+        ctx_hidden.font = css_font;
+        ctx_hidden.fillStyle = '#fff';
+        ctx_hidden.textAlign = 'center';
         ctx_hidden.fillText(txt, x, y_min);
     }
 
-    var counter= 0, old_time= 0, printed=0;
+    var counter= 0, printed=0;
     function animate() {
         d = ctx_hidden.getImageData(0, 0, w, h);
         var d1 = ctx_hidden.getImageData(0, 0, w, h), audio_freq=window.Dancer.getFrequency(10,50);
@@ -101,8 +96,32 @@
         ctx.clearRect(0, 0, w, h);
         ctx.putImageData(d1, 0, 0);
 
+        if (txt_idx<texts.length) window.requestAnimationFrame(animate, canvas);
+        else {
+            console.log('calling window.effects.regionAlphaToMinCenter');
+            $.when(window.effects.regionAlphaToMinCenter({
+                ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+            }))
+            .then(function() {
+                // load image
+                var img = new Image();
+                ctx_hidden.clearRect(0, 0, w, h);
+                ctx.clearRect(0, 0, w, h);
+                img.onload = function() {
+                    ctx_hidden.drawImage(img, 0, 0, 1000, 750);
+                    window.effects.regionAlphaToMin({
+                        ctx: ctx_hidden, el: canvas_hidden, x: 0, y: 0, w: w, h: h
+                    });
+                    d = ctx_hidden.getImageData(0, 0, w, h);
+                    ctx.putImageData(d, 0, 0);
 
-
-        requestAnimationFrame(animate);
+                    console.log('window.effects.regionAlphaToMaxCenter');
+                    window.effects.regionAlphaToMaxCenter({
+                        ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                    });
+                };
+                img.src = 'img/svs-sm.png';
+            });
+        }
     }
 }(jQuery));
