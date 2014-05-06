@@ -14,16 +14,11 @@
     setTimeout(function() {
         console.log('calling regionAlphaToMinCenter');
         var now= _.now();
-        $.when(window.effects.regionAlphaToMinCenter({
+        $.when(window.effects.regionAlphaToMinCenterX({
             ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
         }))
         .then(function() {
             console.log('done, took: '+(now- _.now()));
-            $.when(window.effects.regionAlphaToMaxCenter({
-                ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-            }))
-            .then(function() {
-            });
         });
     }, 2000);
 
