@@ -109,15 +109,10 @@
                 ctx.clearRect(0, 0, w, h);
                 img.onload = function() {
                     ctx_hidden.drawImage(img, 0, 0, 1000, 750);
-                    window.effects.regionAlphaToMin({
-                        ctx: ctx_hidden, el: canvas_hidden, x: 0, y: 0, w: w, h: h
-                    });
                     d = ctx_hidden.getImageData(0, 0, w, h);
-                    ctx.putImageData(d, 0, 0);
-
                     console.log('window.effects.regionAlphaToMaxCenter');
                     window.effects.regionAlphaToMaxCenter({
-                        ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                        ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
                     });
                 };
                 img.src = 'img/svs-sm.png';
