@@ -18,7 +18,7 @@
             "as a tribute to the one game we all love",
             "(I really tried not to screw it up)"
         ],
-        wait=18/texts.length,
+        wait=16/texts.length,
         txt_idx= 0,
         alpha
     ;
@@ -99,7 +99,7 @@
         if (txt_idx<texts.length) window.requestAnimationFrame(animate, canvas);
         else {
             console.log('calling window.effects.regionAlphaToMinCenter');
-            $.when(window.effects.regionAlphaToMinCenter({
+            $.when(window.effects.regionAlphaToMinCenterY({
                 ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
             }))
             .then(function() {
@@ -109,16 +109,19 @@
                 ctx.clearRect(0, 0, w, h);
                 img.onload = function() {
                     ctx_hidden.drawImage(img, 0, 0, 1000, 750);
-                    window.effects.regionAlphaToMin({
-                        ctx: ctx_hidden, el: canvas_hidden, x: 0, y: 0, w: w, h: h
-                    });
                     d = ctx_hidden.getImageData(0, 0, w, h);
-                    ctx.putImageData(d, 0, 0);
-
                     console.log('window.effects.regionAlphaToMaxCenter');
-                    window.effects.regionAlphaToMaxCenter({
-                        ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                    });
+                    $.when(window.effects.regionAlphaToMaxCenterX({
+                        ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+                    }))
+                    .then(function() {
+                            setTimeout(
+                                function() {
+                                    window.effects.regionAlphaToMinCenterY({
+                                        ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                                    });
+                                }, 1000)
+                        });
                 };
                 img.src = 'img/svs-sm.png';
             });
