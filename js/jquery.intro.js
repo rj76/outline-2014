@@ -1,8 +1,8 @@
 (function ($) {
     var freq = .01,
         amp = 8,
-        canvas = document.getElementById("intro_canv"),
-        canvas_hidden = document.getElementById("intro_canv_hidden"),
+        canvas = document.getElementById("canv"),
+        canvas_hidden = document.getElementById("canv_hidden"),
         ctx = canvas.getContext("2d"),
         ctx_hidden = canvas_hidden.getContext("2d"),
         w = canvas.width,
@@ -16,12 +16,17 @@
             "G'day fellow outliners",
             "This is a small demo",
             "as a tribute to the one game we all love",
-            "(I really tried not to screw it up)"
+            "(I really tried not to screw it up)",
+            "(with this being my first demo and all...)"
         ],
-        wait=16/texts.length,
+        wait=18/texts.length,
         txt_idx= 0,
         alpha
     ;
+
+    ctx.globalCompositeOperation = 'copy';
+    ctx_hidden.globalCompositeOperation = 'copy';
+
 
     $.intro = function (demo) {
         this.demo = demo;
@@ -32,11 +37,11 @@
             self = this
             ;
 
-        ctx.fillStyle = '#000'; // set canvas background color
-        ctx.fillRect(0, 0, w, h);  // now fill the canvas
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, w, h);
 
-        ctx_hidden.fillStyle = '#000'; // set canvas background color
-        ctx_hidden.fillRect(0, 0, w, h);  // now fill the canvas
+        ctx_hidden.fillStyle = '#000';
+        ctx_hidden.fillRect(0, 0, w, h);
 
         setNextText();
 
@@ -93,38 +98,40 @@
             }
         }
 
-        ctx.clearRect(0, 0, w, h);
+//        ctx.clearRect(0, 0, w, h);
         ctx.putImageData(d1, 0, 0);
 
         if (txt_idx<texts.length) window.requestAnimationFrame(animate, canvas);
-        else {
-            console.log('calling window.effects.regionAlphaToMinCenter');
-            $.when(window.effects.regionAlphaToMinCenterY({
-                ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-            }))
-            .then(function() {
-                // load image
-                var img = new Image();
-                ctx_hidden.clearRect(0, 0, w, h);
-                ctx.clearRect(0, 0, w, h);
-                img.onload = function() {
-                    ctx_hidden.drawImage(img, 0, 0, 1000, 750);
-                    d = ctx_hidden.getImageData(0, 0, w, h);
-                    console.log('window.effects.regionAlphaToMaxCenter');
-                    $.when(window.effects.regionAlphaToMaxCenterX({
-                        ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
-                    }))
-                    .then(function() {
-                            setTimeout(
-                                function() {
-                                    window.effects.regionAlphaToMinCenterY({
-                                        ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                                    });
-                                }, 1000)
-                        });
-                };
-                img.src = 'img/svs-sm.png';
-            });
-        }
+        else doImage();
+    }
+
+    function doImage() {
+        console.log('calling window.effects.regionAlphaToMinCenter');
+        $.when(window.effects.regionAlphaToMinCenterY({
+            ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+        }))
+        .then(function() {
+            // load image
+            var img = new Image();
+            ctx_hidden.clearRect(0, 0, w, h);
+            ctx.clearRect(0, 0, w, h);
+            img.onload = function() {
+                ctx_hidden.drawImage(img, 0, 0, 1000, 750);
+                d = ctx_hidden.getImageData(0, 0, w, h);
+                console.log('window.effects.regionAlphaToMaxCenter');
+                $.when(window.effects.regionAlphaToMaxCenterX({
+                    ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+                }))
+                .then(function() {
+                        setTimeout(
+                            function() {
+                                window.effects.regionAlphaToMinCenterY({
+                                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                                });
+                            }, 1000)
+                    });
+            };
+            img.src = 'img/svs-sm.png';
+        });
     }
 }(jQuery));
