@@ -50,8 +50,8 @@
                     { x: 10-0.8, y: 2 }
                 ],
                 sprite: {
-                    x: 10-0.8,
-                    y: 4
+                    x: 8.6,
+                    y: 3
                 }
             },
             back_left: {
@@ -75,16 +75,16 @@
                 ],
                 sprite: {
                     x: 6.2,
-                    y: 1
+                    y: 2.5
                 }
             }
         },
         sprites = {
             spy: {
-                speed: 1,
+                speed: 1.2,
                 zoom: 1.3,
                 time: 0.2,
-                wait: 10,
+                wait: 5,
                 num_images: 0,
                 num_objects: 0,
                 punch_right: {
@@ -147,7 +147,7 @@
 
                         // create room config
                         active_config = room_configs[randomIntFromInterval(0, room_configs.length-1)];
-                        active_config = 'lb';
+//                        active_config = 'lr';
 
                         createRoom();
                         createDoors();
@@ -347,17 +347,43 @@
             - make image bigger? met factor
             - move from door to door
          */
+        var x, y, end_x, end_y;
         switch(active_config) {
             case 'lr':
-                spyLeftRight();
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+doors.right.sprite.x*zoom;
+                $.when(moveSpyRight({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    })).then(function() {
+                        console.log('left to rigt done');
+                });
                 break;
             case 'rb':
-                spyRightBack();
+                x = doors.right.sprite.x*zoom+offset_left;
+                y = top+doors.right.sprite.y*zoom;
+                end_x = offset_left+doors.back_left.sprite.x*zoom;
+                end_y = doors.back_left.sprite.y*zoom;
+                $.when(moveSpyLeft({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    }))
+                    .then(function() {
+                        moveSpyBack({
+                            x: end_x,
+                            end_y: end_y,
+                            y: y
+                        });
+                    });
                 break;
             case 'lb':
-                var x = doors.left.sprite.x*zoom+offset_left;
-                var y = top+doors.left.sprite.y*zoom;
-                var end_x = offset_left+doors.back_right.sprite.x*zoom;
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+doors.back_right.sprite.x*zoom;
+                end_y = doors.back_right.sprite.y*zoom;
                 $.when(moveSpyRight({
                         x: x,
                         end_x: end_x,
@@ -366,7 +392,7 @@
                     .then(function() {
                         moveSpyBack({
                             x: end_x,
-                            end_y: top+doors.back_right.sprite.y*zoom,
+                            end_y: end_y,
                             y: y
                         });
                     });
@@ -375,7 +401,6 @@
     }
 
     function moveSpyRight(opts) {
-        // move to right: x from doors.left.x/y to doors.back_right.x
         var
             d = new $.Deferred(),
             timer = new FrameTimer(),
@@ -420,7 +445,7 @@
     }
 
     function moveSpyBack(opts) {
-        // move to top: y from doors.left.y to doors.back_right.y
+        console.log('moveSpyBack called');
         var
             d = new $.Deferred(),
             timer = new FrameTimer(),
@@ -441,6 +466,7 @@
         var t = setInterval(function() {
             opts.y -= sprites.spy.speed;
             if (opts.y<=opts.end_y) {
+                console.log([opts.y, opts.end_y]);
                 clearTimeout(t);
                 d.resolve();
                 return;
@@ -465,7 +491,6 @@
     }
 
     function moveSpyLeft(opts) {
-        // move to right: x from doors.left.x/y to doors.back_right.x
         var
             d = new $.Deferred(),
             timer = new FrameTimer(),
