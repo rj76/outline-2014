@@ -24,6 +24,7 @@
                             self.demo.$intro.start();
                         })
                         .onceAt(23.2, function() {
+                            $.when(self.demo)
                             console.log('end intro, start beat')
                         })
                         .onceAt(46.3, function() {

@@ -62,7 +62,7 @@
                     { x: 3, y: .8 }
                 ],
                 sprite: {
-                    x: 3,
+                    x: 3.2,
                     y: 2.5
                 }
             },
@@ -142,44 +142,45 @@
                     'js/sprite/SpriteSheet.js'
                 ],
                 complete: function() {
-                    for(tune_idx=0;tune_idx<3;tune_idx++) {
-                        // clear and fade in
-
-                        // create room config
-                        active_config = room_configs[randomIntFromInterval(0, room_configs.length-1)];
-//                        active_config = 'lr';
-
-                        createRoom();
-                        createDoors();
-
-                        switch(active_config) {
-                            case 'lb':
-                                createPainting(2.5*zoom);
-                                break;
-                            case 'lr':
-                                createPainting(2.5*zoom);
-                                createPainting(5.5*zoom);
-                                break;
-
-                            case 'rb':
-                                createPainting(5.5*zoom);
-                                break;
-                        }
-
-                        base_img = ctx.getImageData(0, 0, w, h);
-
-                        // move sprite through room
-                        $.when(moveSpy()).then(doVisual);
-
-                        // start visual
-
-                        // fade out
-
-                    }
+                    doAll();
                 }
             });
         });
     };
+
+    function doAll() {
+        // clear and fade in
+
+        // create room config
+        active_config = room_configs[randomIntFromInterval(0, room_configs.length-1)];
+//                        active_config = 'lr';
+
+        createRoom();
+        createDoors();
+
+        switch(active_config) {
+            case 'lb':
+                createPainting(2.5*zoom);
+                break;
+            case 'lr':
+                createPainting(2.5*zoom);
+                createPainting(5.5*zoom);
+                break;
+
+            case 'rb':
+                createPainting(5.5*zoom);
+                break;
+        }
+
+        base_img = ctx.getImageData(0, 0, w, h);
+
+        // move sprite through room
+        $.when(moveSpy()).then(function() {
+            if (tune_idx++<4) {
+                setTimeout(doAll, 10);
+            }
+        });
+    }
 
     function loadWallpapers() {
         var d = new $.Deferred();
@@ -347,9 +348,10 @@
             - make image bigger? met factor
             - move from door to door
          */
-        var x, y, end_x, end_y;
+        var x, y, end_x, end_y, d = new $.Deferred();
         switch(active_config) {
             case 'lr':
+                console.log('lr');
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.right.sprite.x*zoom;
@@ -359,9 +361,11 @@
                         y: y
                     })).then(function() {
                         console.log('left to rigt done');
+                        d.resolve();
                 });
                 break;
             case 'rb':
+                console.log('rb');
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+doors.back_left.sprite.x*zoom;
@@ -372,14 +376,19 @@
                         y: y
                     }))
                     .then(function() {
-                        moveSpyBack({
+                        $.when(moveSpyBack({
                             x: end_x,
                             end_y: end_y,
                             y: y
+                        }))
+                        .then(function() {
+                            console.log('rigt to back done');
+                            d.resolve();
                         });
                     });
                 break;
             case 'lb':
+                console.log('lb');
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.back_right.sprite.x*zoom;
@@ -390,17 +399,24 @@
                         y: y
                     }))
                     .then(function() {
-                        moveSpyBack({
+                        $.when(moveSpyBack({
                             x: end_x,
                             end_y: end_y,
                             y: y
+                        }))
+                        .then(function() {
+                            console.log('left to back done');
+                            d.resolve();
                         });
                     });
                 break;
         }
+
+        return d;
     }
 
     function moveSpyRight(opts) {
+        console.log('moveSpyRight called');
         var
             d = new $.Deferred(),
             timer = new FrameTimer(),
