@@ -1,7 +1,5 @@
 (function ($) {
     var
-        len=(96-46.3)/100,
-        wait= len/4/10,
         tot= 0,
         opts
     ;
@@ -20,10 +18,10 @@
     var animate_d;
     function animate() {
         if (!animate_d) animate_d = new $.Deferred();
-        generate();
-        if (tot<=len) {
-            tot += wait;
-            setTimeout(animate, wait*10);
+        tot += opts.wait;
+        if (tot<opts.len) {
+            generate();
+            setTimeout(animate, opts.wait);
         } else {
             animate_d.resolve();
         }

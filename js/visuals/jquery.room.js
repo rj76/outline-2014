@@ -10,6 +10,8 @@
         top=50,
         offset_left=50,
         line_width=2,
+        len=(96-46.3),
+        wait= (len/4)/10,
         colors = ['#d17ded', '#f9d99c'],
         coords_fill = [
             { type: 'moveto', x: 0, y: 5 },
@@ -130,7 +132,8 @@
         room_configs = ['lb', 'lr', 'rb'], // door: left and back (lb), left and right (lr), right and back (rb)
         active_config,
         tune_idx= 0,
-        visuals=[]
+        visuals=[],
+        visuals_done=0
     ;
 
     $.room = function() {};
@@ -142,10 +145,14 @@
                     'js/sprite/Animation.js',
                     'js/sprite/FrameTimer.js',
                     'js/sprite/SpriteSheet.js',
-                    'js/visuals/jquery.fractal_concentric.js'
+                    'js/visuals/jquery.fractal_concentric.js',
+                    'js/visuals/jquery.plasma.js'
                 ],
                 complete: function() {
                     visuals.push(new $.fractal_concentric);
+                    visuals.push(new $.plasma);
+                    visuals.push(new $.plasma);
+                    visuals.push(new $.plasma);
                     doAll();
                 }
             });
@@ -192,7 +199,7 @@
                 .then(function() {
                     $.when(doVisual()).then(function() {
                         console.log('visual done');
-                        if (tune_idx++<4) {
+                        if (tune_idx++<4 || visuals_done >= visuals.length) {
                             setTimeout(doAll, 10);
                         }
                     });
@@ -553,11 +560,23 @@
 
     function doVisual() {
         //return visuals.pop().start({
-        return visuals[0].start({
-            w:w,
-            h:h,
-            ctx: ctx
-        });
+        var d = new $.Deferred();
+        if (visuals_done < visuals.length) {
+            $.when(visuals[visuals_done].start({
+                w:w,
+                h:h,
+                ctx: ctx,
+                canvas: canvas,
+                len: len,
+                wait: wait
+            }))
+            .then(function() {
+                visuals_done++;
+                d.resolve();
+            });
+        } else d.resolve();
+
+        return d;
     }
 
 })(jQuery);
