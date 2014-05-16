@@ -6,7 +6,7 @@
         w = canvas.width,
         h = canvas.height,
         base_img,
-        zoom=50,
+        zoom=40,
         top=50,
         offset_left=50,
         line_width=2,
@@ -83,7 +83,7 @@
         },
         sprites = {
             spy: {
-                speed: 1.2,
+                speed: 1,
                 zoom: 1.3,
                 time: 0.2,
                 wait: 5,
