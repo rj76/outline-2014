@@ -1,6 +1,8 @@
 (function ($) {
     var canvas = document.getElementById("canv"),
         ctx = canvas.getContext("2d"),
+        canvas_hidden = document.getElementById("canv_hidden"),
+        ctx_hidden = canvas_hidden.getContext("2d"),
         w = canvas.width,
         h = canvas.height,
         base_img,
@@ -134,7 +136,6 @@
     $.room.prototype.start = function () {
         // load images
         $.when(loadWallpapers(), loadSprites()).then(function() {
-            console.log('all images loaded');
             Modernizr.load({
                 load: [
                     'js/sprite/Animation.js',
@@ -173,12 +174,24 @@
         }
 
         base_img = ctx.getImageData(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
+        ctx_hidden.putImageData(base_img, 0, 0);
 
-        // move sprite through room
-        $.when(moveSpy()).then(function() {
-            if (tune_idx++<4) {
-                setTimeout(doAll, 10);
-            }
+        $.when(window.effects.regionAlphaToMaxCenterX({
+            ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+        }))
+        .then(function() {
+            // move sprite through room
+            $.when(moveSpy()).then(function() {
+                $.when(window.effects.regionAlphaToMinCenterY({
+                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                }))
+                .then(function() {
+                    if (tune_idx++<4) {
+                            setTimeout(doAll, 10);
+                    }
+                });
+            });
         });
     }
 
@@ -244,10 +257,6 @@
     }
 
     function createPainting(offset_x) {
-        /*
-            TODO: verticaal centreren, en horizontaal centreren checken
-                    portrait implementeren
-         */
         var
             idx = Math.floor(Math.random()*(wallpaper_objects.length-1)+1),
             img = wallpaper_objects[idx],
@@ -343,15 +352,9 @@
     }
 
     function moveSpy() {
-        /*
-            TODO:
-            - make image bigger? met factor
-            - move from door to door
-         */
         var x, y, end_x, end_y, d = new $.Deferred();
         switch(active_config) {
             case 'lr':
-                console.log('lr');
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.right.sprite.x*zoom;
@@ -360,12 +363,10 @@
                         end_x: end_x,
                         y: y
                     })).then(function() {
-                        console.log('left to rigt done');
                         d.resolve();
                 });
                 break;
             case 'rb':
-                console.log('rb');
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+doors.back_left.sprite.x*zoom;
@@ -382,13 +383,11 @@
                             y: y
                         }))
                         .then(function() {
-                            console.log('rigt to back done');
                             d.resolve();
                         });
                     });
                 break;
             case 'lb':
-                console.log('lb');
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.back_right.sprite.x*zoom;
@@ -405,7 +404,6 @@
                             y: y
                         }))
                         .then(function() {
-                            console.log('left to back done');
                             d.resolve();
                         });
                     });
@@ -416,7 +414,6 @@
     }
 
     function moveSpyRight(opts) {
-        console.log('moveSpyRight called');
         var
             d = new $.Deferred(),
             timer = new FrameTimer(),
@@ -435,7 +432,7 @@
         ;
 
         var t = setInterval(function() {
-            opts.x += sprites.spy.speed;//, console.log(x)
+            opts.x += sprites.spy.speed;
             if (opts.x>=opts.end_x) {
                 clearTimeout(t);
                 d.resolve();
@@ -461,7 +458,6 @@
     }
 
     function moveSpyBack(opts) {
-        console.log('moveSpyBack called');
         var
             d = new $.Deferred(),
             timer = new FrameTimer(),
@@ -482,7 +478,6 @@
         var t = setInterval(function() {
             opts.y -= sprites.spy.speed;
             if (opts.y<=opts.end_y) {
-                console.log([opts.y, opts.end_y]);
                 clearTimeout(t);
                 d.resolve();
                 return;
@@ -525,7 +520,7 @@
         ;
 
         var t = setInterval(function() {
-            opts.x -= sprites.spy.speed;//, console.log(x)
+            opts.x -= sprites.spy.speed;
             if (opts.x<=opts.end_x) {
                 clearTimeout(t);
                 d.resolve();

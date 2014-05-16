@@ -6,7 +6,7 @@
         opts,
         current_x, current_y,
         deferred,
-        x_factor=8, y_factor= 2,
+        x_factor=10, y_factor= 8,
         counter=0
         ;
 

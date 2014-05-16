@@ -11,23 +11,7 @@
     ctx.fillRect(0, 0, w, h);
     ctx.globalCompositeOperation = 'source-over';
 
-    /*
-        het moet mogelijk zijn op te geven welke kant de spy op gaat,
-        tot welke positie en welke sprite (kant dan op).
-        Dus de richtingen moeten voor geprogrammeerd worden, waarbij de spy
-        van start_x naar end_x beweegt
-
-     */
-
-//    var sprite = new $.sprite();
-//    sprite.start({
-//        ctx: ctx,
-//        w: w,
-//        h: h,
-//        s_w: 32,
-//        s_h: 37,
-//        img: 'img/walk-right.png'
-//    });
+    window.effects = new $.effects();
 
     var room = new $.room();
     room.start();
