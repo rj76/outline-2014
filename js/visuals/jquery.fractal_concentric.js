@@ -1,33 +1,37 @@
-function canvasApp() {
-	var theCanvas = document.getElementById("canvasOne");
-	var context = theCanvas.getContext("2d");
-	var displayWidth = theCanvas.width;
-	var displayHeight = theCanvas.height;
+(function ($) {
+    var
+        len=(96-46.3)/100,
+        wait= len/4/10,
+        tot= 0,
+        opts
+    ;
 
-	init();
+    $.fractal_concentric = function() {};
+    $.fractal_concentric.prototype.start = function (_opts) {
+        tot=0;
+        opts = _opts;
+        var d = new $.Deferred();
+        $.when(animate()).then(function() {
+            d.resolve();
+        });
+        return d;
+    };
 
-	function init() {
+    var animate_d;
+    function animate() {
+        if (!animate_d) animate_d = new $.Deferred();
+        generate();
+        if (tot<=len) {
+            tot += wait;
+            setTimeout(animate, wait*10);
+        } else {
+            animate_d.resolve();
+        }
 
-		generate();
+        return animate_d;
+    }
 
-		theCanvas.addEventListener("click", clickListener, false);
-	}
-
-	function clickListener(evt) {
-		context.clearRect(0,0,theCanvas.width,theCanvas.height);
-		generate();
-
-		//code below prevents the mouse down from having an effect on the main browser window:
-		if (evt.preventDefault) {
-			evt.preventDefault();
-		} //standard
-		else if (evt.returnValue) {
-			evt.returnValue = false;
-		} //older IE
-		return false;
-	}
-
-	function setLinePoints(iterations) {
+    function setLinePoints(iterations) {
 		var pointList = {};
 		pointList.first = {x:0, y:1};
 		var lastPoint = {x:1, y:1}
@@ -88,15 +92,15 @@ function canvasApp() {
 	}
 
 	function generate() {
-		var centerX, centerY;
+        var centerX, centerY;
 		var r,g,b,a;
 		var color0, color1;
 		var lineW;
 		var maxRad, minRad;
 		var phase;
 
-		centerX = displayWidth/2;
-		centerY = displayHeight/2;
+		centerX = opts.w/2;
+		centerY = opts.h/2;
 
 		var numCircles = 20;
 		var startAlpha = 55/255;
@@ -112,15 +116,15 @@ function canvasApp() {
 			b = Math.floor(Math.random()*255);
 			//square-rooting the parameter moves the alpha towards transparent more rapidly.
 			a = startAlpha + (i/(numCircles-1))*(endAlpha - startAlpha);
-			a0 = 0.67*a;
+			var a0 = 0.67*a;
 
 			//very subtle radial gradient
 			color1 = "rgba("+r+","+g+","+b+","+a+")";
 			color0 = "rgba("+r+","+g+","+b+","+a0+")";
-			grad = context.createRadialGradient(centerX,centerY,0.67*maxRad,centerX,centerY,maxRad);
+			var grad = opts.ctx.createRadialGradient(centerX,centerY,0.67*maxRad,centerX,centerY,maxRad);
 			grad.addColorStop(0,color0);
 			grad.addColorStop(1,color1);
-			context.fillStyle = grad;
+			opts.ctx.fillStyle = grad;
 
 			phase = Math.random()*Math.PI*2;
 
@@ -137,26 +141,26 @@ function canvasApp() {
 		//generate the random function that will be used to vary the radius, 9 iterations of subdivision
 		var pointList = setLinePoints(9);
 
-		context.strokeStyle = lineColor;
-		context.lineWidth = 1.01;
-		context.fillStyle = fill;
-		context.beginPath();
+		opts.ctx.strokeStyle = lineColor;
+		opts.ctx.lineWidth = 1.01;
+		opts.ctx.fillStyle = fill;
+		opts.ctx.beginPath();
 		point = pointList.first;
 		theta = phase;
 		rad = minRad + point.y*(maxRad - minRad);
 		x0 = centerX + rad*Math.cos(theta);
 		y0 = centerY + rad*Math.sin(theta);
-		context.lineTo(x0, y0);
+		opts.ctx.lineTo(x0, y0);
 		while (point.next != null) {
 			point = point.next;
 			theta = twoPi*point.x + phase;
 			rad = minRad + point.y*(maxRad - minRad);
 			x0 = centerX + rad*Math.cos(theta);
 			y0 = centerY + rad*Math.sin(theta);
-			context.lineTo(x0, y0);
+			opts.ctx.lineTo(x0, y0);
 		}
-		context.stroke();
-		context.fill();
+		opts.ctx.stroke();
+		opts.ctx.fill();
 	}
 
-}
+})(jQuery);

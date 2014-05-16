@@ -129,7 +129,8 @@
         wallpaper_objects = [],
         room_configs = ['lb', 'lr', 'rb'], // door: left and back (lb), left and right (lr), right and back (rb)
         active_config,
-        tune_idx=0
+        tune_idx= 0,
+        visuals=[]
     ;
 
     $.room = function() {};
@@ -140,9 +141,11 @@
                 load: [
                     'js/sprite/Animation.js',
                     'js/sprite/FrameTimer.js',
-                    'js/sprite/SpriteSheet.js'
+                    'js/sprite/SpriteSheet.js',
+                    'js/visuals/jquery.fractal_concentric.js'
                 ],
                 complete: function() {
+                    visuals.push(new $.fractal_concentric);
                     doAll();
                 }
             });
@@ -187,9 +190,12 @@
                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
                 }))
                 .then(function() {
-                    if (tune_idx++<4) {
+                    $.when(doVisual()).then(function() {
+                        console.log('visual done');
+                        if (tune_idx++<4) {
                             setTimeout(doAll, 10);
-                    }
+                        }
+                    });
                 });
             });
         });
@@ -546,7 +552,12 @@
     }
 
     function doVisual() {
-
+        //return visuals.pop().start({
+        return visuals[0].start({
+            w:w,
+            h:h,
+            ctx: ctx
+        });
     }
 
 })(jQuery);
