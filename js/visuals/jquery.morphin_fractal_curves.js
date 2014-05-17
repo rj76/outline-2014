@@ -1,22 +1,8 @@
-function canvasApp() {
-	var displayCanvas = document.getElementById("displayCanvas");
-	var context = displayCanvas.getContext("2d");
-	var displayWidth = displayCanvas.width;
-	var displayHeight = displayCanvas.height;
-	
-	//off screen canvas used only when exporting image
-	var exportCanvas = document.createElement('canvas');
-	exportCanvas.width = displayWidth;
-	exportCanvas.height = displayHeight;
-	var exportCanvasContext = exportCanvas.getContext("2d");
-		
-	//buttons
-	var btnExport = document.getElementById("btnExport");
-	btnExport.addEventListener("click", exportPressed, false);
-	
-	var btnRegenerate = document.getElementById("btnRegenerate");
-	btnRegenerate.addEventListener("click", regeneratePressed, false);
-	
+(function ($) {
+    var
+        tot = 0,
+        opts
+        ;
 	var numCircles;
 	var maxMaxRad;
 	var minMaxRad;
@@ -24,72 +10,92 @@ function canvasApp() {
 	var circles;
 	var iterations;
 	var numPoints;
-	var timer;
 	var drawsPerFrame;
 	var drawCount;
-	var bgColor,urlColor;
+	var bgColor;
 	var lineWidth;
 	var colorParamArray;
 	var colorArray;
 	var dataLists;
 	var minX, maxX, minY, maxY;
 	var xSpace, ySpace;
-	var lineNumber;
+	var lineNumber=0;
 	var twistAmount;
 	var fullTurn;
 	var lineAlpha;
 	var maxColorValue;
-	
-	init();
-	
+
+    $.fractal_curves = function () {};
+    $.fractal_curves.prototype.start = function (_opts) {
+        tot = 0;
+        opts = _opts;
+
+        init();
+        window.effects.regionAlphaToMax({
+            x: 0, y: 0, w: opts.w, h: opts.h, ctx: opts.ctx, el: opts.canvas
+        });
+
+        var d = new $.Deferred();
+        $.when(animate()).then(function () {
+            d.resolve();
+        });
+        return d;
+    };
+
+    var animate_d;
+    function animate() {
+        if (!animate_d) animate_d = new $.Deferred();
+        tot += opts.wait;
+        if (tot < opts.len*10) {
+            lineNumber++;
+//            init();
+    		colorArray = setColorList(iterations);
+            create();
+            setTimeout(animate, opts.wait);
+        } else {
+            console.log([lineNumber, tot, opts.wait, opts.len]);
+            console.log('animate done');
+            animate_d.resolve();
+        }
+
+        return animate_d;
+    }
+
 	function init() {
-		numCircles = 15;
+		numCircles = 40;
 		maxMaxRad = 200;
 		minMaxRad = 200;
 		minRadFactor = 0;
 		iterations = 11;
 		numPoints = Math.pow(2,iterations)+1;
 		drawsPerFrame = 4;
-		
+
 		fullTurn = Math.PI*2*numPoints/(1+numPoints);
-		
+
 		minX = -maxMaxRad;
-		maxX = displayWidth + maxMaxRad;
-		minY = displayHeight/2-50;
-		maxY = displayHeight/2+50;
-		
+		maxX = opts.w + maxMaxRad;
+		minY = opts.h/2;
+		maxY = opts.h/2;
+
 		twistAmount = 0.6*Math.PI*2;
-		
+
 		stepsPerSegment = Math.floor(500/numCircles);
-		
-		maxColorValue = 80;
-		lineAlpha = 0.06;
-		
-		bgColor = "#ffffff";
-		urlColor = "#cccccc";
-		
+
+		maxColorValue = 255;
+		lineAlpha = 0.8;
+
 		lineWidth = 1.25;
-		
-		startGenerate();
-	}
-		
-	function startGenerate() {
+
 		drawCount = 0;
-		context.setTransform(1,0,0,1,0,0);
-		
-		context.clearRect(0,0,displayWidth,displayHeight);
-		
+		opts.ctx.setTransform(1,0,0,1,0,0);
+
+		opts.ctx.clearRect(0,0,opts.w,opts.h);
+
 		setCircles();
-		
+
 		colorArray = setColorList(iterations);
-				
-		lineNumber = 0;
-		
-		if(timer) {clearInterval(timer);}
-		timer = setInterval(onTimer,1000/60);
-		
 	}
-	
+
 	function setColorList(iter) {
 		//This function sets an array of colors which vary between three random choices. The variation
 		//is set according to a fractal subdivision function.
@@ -100,35 +106,37 @@ function canvasApp() {
 		var colorArray;
 		var lastColorObject;
 		var i, len;
-		
+		var r,g,b,a;
+		var grad;
+
 		var redFactor = 1;
 		var blueFactor = 0.7;
 		var greenFactor = 1;
-		
+
 		r0 = redFactor*Math.random()*maxColorValue;
 		//I like to balance reds with some green, so I'm making sure green is at least 20 percent of the red.
 		g0 = 0.2*r0 + greenFactor*Math.random()*(maxColorValue - 0.2*r0);
 		b0 = blueFactor*Math.random()*maxColorValue;
-				
+
 		r2 = redFactor*Math.random()*maxColorValue;
 		g2 = 0.2*r2 + greenFactor*Math.random()*(maxColorValue - 0.2*r2);
 		b2 = blueFactor*Math.random()*maxColorValue;
-		
+
 		//middle color will be darkened average of other two
 		r1 = 0.2*(r0+r2);
 		g1 = 0.2*(g0+g2);
 		b1 = 0.2*(b0+b2);
-		
+
 		a = lineAlpha;
-		
+
 		var colorParamArray = setLinePoints(iter);
 		colorArray = [];
-		
+
 		len = colorParamArray.length;
-		
+
 		for (i = 0; i < len; i++) {
 			param = colorParamArray[i];
-			
+
 			if (param < 0.5) {
 				r = Math.floor(r0 + 2*param*(r1 - r0));
 				g = Math.floor(g0 + 2*param*(g1 - g0));
@@ -139,27 +147,25 @@ function canvasApp() {
 				g = Math.floor(g1 + 2*(param-0.5)*(g2 - g1));
 				b = Math.floor(b1 + 2*(param-0.5)*(b2 - b1));
 			}
-			
+
 			var newColor = "rgba("+r+","+g+","+b+","+a+")";
-			
+
 			colorArray.push(newColor);
 		}
-		
+
 		return colorArray;
-		
+
 	}
-	
+
 	function setCircles() {
 		var i;
-		var r,g,b,a;
-		var grad;
-		
+
 		circles = [];
-		
+
 		for (i = 0; i < numCircles; i++) {
 			maxR = minMaxRad+Math.random()*(maxMaxRad-minMaxRad);
 			minR = minRadFactor*maxR;
-			
+
 			var newCircle = {
 				centerX: minX + i/(numCircles-1)*(maxX - minX),
 				centerY: minY + i/(numCircles-1)*(maxY - minY),
@@ -168,38 +174,36 @@ function canvasApp() {
 				phase : i/(numCircles-1)*twistAmount,
 				//phase: Math.random()*Math.PI*2,
 				pointArray : setLinePoints(iterations)
-				};
+            };
 			circles.push(newCircle);
 		}
 	}
-	
-	function onTimer() {
-		var i;
+
+	function create() {
+		var i, j;
 		var cosTheta, sinTheta;
 		var theta;
-		
+
 		var numCircles = circles.length;
 
 		var linParam;
 		var cosParam;
 		var centerX, centerY;
-		var xSqueeze = 0.75;
+		var xSqueeze = Math.random()+1;//1.5;
 		var x0,y0;
 		var rad, rad0, rad1;
 		var phase, phase0, phase1;
-		
+
 		for (var k = 0; k < drawsPerFrame; k++) {
-		
+
 			theta = -lineNumber/(numPoints-1)*fullTurn;
-			
-			//context.globalCompositeOperation = "lighter";
-			
-			context.lineJoin = "miter";
-			
-			context.strokeStyle = colorArray[lineNumber];
-			context.lineWidth = lineWidth;
-			context.beginPath();
-			
+
+			opts.ctx.lineJoin = "miter";
+
+			opts.ctx.strokeStyle = colorArray[lineNumber];
+			opts.ctx.lineWidth = lineWidth;
+			opts.ctx.beginPath();
+
 			//move to first point
 			centerX = circles[0].centerX;
 			centerY = circles[0].centerY;
@@ -207,78 +211,74 @@ function canvasApp() {
 			phase = circles[0].phase;
 			x0 = centerX + xSqueeze*rad*Math.cos(theta + phase);
 			y0 = centerY + rad*Math.sin(theta + phase);
-			context.moveTo(x0,y0);
-			
+			opts.ctx.moveTo(x0,y0);
+
 			for (i=0; i< numCircles-1; i++) {
 				//draw between i and i+1 circle
 				rad0 = circles[i].minRad + circles[i].pointArray[lineNumber]*(circles[i].maxRad - circles[i].minRad);
 				rad1 = circles[i+1].minRad + circles[i+1].pointArray[lineNumber]*(circles[i+1].maxRad - circles[i+1].minRad);
 				phase0 = circles[i].phase;
 				phase1 = circles[i+1].phase;
-				
+
 				for (j = 0; j < stepsPerSegment; j++) {
 					linParam = j/(stepsPerSegment-1);
 					cosParam = 0.5-0.5*Math.cos(linParam*Math.PI);
-					
+
 					//interpolate center
 					centerX = circles[i].centerX + linParam*(circles[i+1].centerX - circles[i].centerX);
 					centerY = circles[i].centerY + linParam*(circles[i+1].centerY - circles[i].centerY);
-					
+
 					//interpolate radius
 					rad = rad0 + cosParam*(rad1 - rad0);
-					
+
 					//interpolate phase
 					phase = phase0 + cosParam*(phase1 - phase0);
-					
+
 					x0 = centerX + xSqueeze*rad*Math.cos(theta + phase);
 					y0 = centerY + rad*Math.sin(theta + phase);
-					
-					context.lineTo(x0,y0);
-					
+
+					opts.ctx.lineTo(x0,y0);
 				}
-				
 			}
-			
-			context.stroke();
-					
-			lineNumber++;
-			if (lineNumber > numPoints-1) {
-				clearInterval(timer);
-				timer = null;
-				break;
-			}
+
+//            if (lineNumber > numPoints-1) {
+//                lineNumber = 0;
+//                break;
+//            }
+
+			opts.ctx.stroke();
 		}
 	}
-		
+
 	//Here is the function that defines a noisy (but not wildly varying) data set which we will use to draw the curves.
 	//We first define the points in a linked list, but then store the values in an array.
 	function setLinePoints(iterations) {
 		var pointList = {};
 		var pointArray = [];
 		pointList.first = {x:0, y:1};
-		var lastPoint = {x:1, y:1}
+		var lastPoint = {x:1, y:1};
 		var minY = 1;
 		var maxY = 1;
 		var point;
 		var nextPoint;
 		var dx, newX, newY;
 		var ratio;
-		
+
 		var minRatio = 0.5;
-				
+
 		pointList.first.next = lastPoint;
 		for (var i = 0; i < iterations; i++) {
 			point = pointList.first;
 			while (point.next != null) {
 				nextPoint = point.next;
-				
+
 				dx = nextPoint.x - point.x;
 				newX = 0.5*(point.x + nextPoint.x);
 				newY = 0.5*(point.y + nextPoint.y);
 				newY += dx*(Math.random()*2 - 1);
-				
+
 				var newPoint = {x:newX, y:newY};
-				
+
 				//min, max
 				if (newY < minY) {
 					minY = newY;
@@ -286,15 +286,15 @@ function canvasApp() {
 				else if (newY > maxY) {
 					maxY = newY;
 				}
-				
+
 				//put between points
 				newPoint.next = nextPoint;
 				point.next = newPoint;
-				
+
 				point = nextPoint;
 			}
 		}
-		
+
 		//normalize to values between 0 and 1
 		//Also store y values in array here.
 		if (maxY != minY) {
@@ -315,7 +315,7 @@ function canvasApp() {
 				point = point.next;
 			}
 		}
-				
-		return pointArray;		
+
+		return pointArray;
 	}
-}
+})(jQuery);

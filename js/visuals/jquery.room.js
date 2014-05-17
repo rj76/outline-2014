@@ -146,13 +146,15 @@
                     'js/sprite/FrameTimer.js',
                     'js/sprite/SpriteSheet.js',
                     'js/visuals/jquery.fractal_concentric.js',
-                    'js/visuals/jquery.plasma.js'
+                    'js/visuals/jquery.plasma.js',
+                    'js/visuals/jquery.hgraph.js',
+                    'js/visuals/jquery.morphin_fractal_curves.js'
                 ],
                 complete: function() {
+                    visuals.push(new $.fractal_curves);
                     visuals.push(new $.fractal_concentric);
                     visuals.push(new $.plasma);
-                    visuals.push(new $.plasma);
-                    visuals.push(new $.plasma);
+                    visuals.push(new $.hgraph);
                     doAll();
                 }
             });
@@ -199,7 +201,7 @@
                 .then(function() {
                     $.when(doVisual()).then(function() {
                         console.log('visual done');
-                        if (tune_idx++<4 || visuals_done >= visuals.length) {
+                        if (tune_idx++<4 && visuals_done < visuals.length) {
                             setTimeout(doAll, 10);
                         }
                     });
@@ -292,7 +294,7 @@
             ;
             ratio = new_width/img.width;
             img_x = offset_left+offset_x+(width_x_max/2-new_width/2);
-            img_y = offset_y+(4.5*zoom)/2-(img.height*ratio)/2;
+            img_y = offset_y+(4.8*zoom)/2-(img.height*ratio)/2;
             ctx.drawImage(img, img_x, img_y, img.width*ratio, img.height*ratio);
         }
 
@@ -302,7 +304,7 @@
                 new_height = randomIntFromInterval(height_y_min, height_y_max)
             ;
             ratio = new_height/img.height;
-            img_y = offset_y+1.5*zoom+(height_y_max/2-new_height/2);
+            img_y = offset_y+1.8*zoom+(height_y_max/2-new_height/2);
             img_x = offset_left+offset_x+((img.width*ratio)/2);
             ctx.drawImage(img, img_x, img_y, img.width*ratio, img.height*ratio);
         }
@@ -561,6 +563,7 @@
     function doVisual() {
         //return visuals.pop().start({
         var d = new $.Deferred();
+        console.log([visuals_done, visuals.length]);
         if (visuals_done < visuals.length) {
             $.when(visuals[visuals_done].start({
                 w:w,
