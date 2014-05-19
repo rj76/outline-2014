@@ -1,35 +1,24 @@
 (function ($) {
     var
-        tot = 0,
+        do_loop=true,
         opts
         ;
 
-    $.hgraph = function () {
-    };
+    $.hgraph = function () {};
     $.hgraph.prototype.start = function (_opts) {
-        tot = 0;
         opts = _opts;
-        var d = new $.Deferred();
-        $.when(animate()).then(function () {
-            d.resolve();
-        });
-        return d;
+        animate();
     };
 
-    var animate_d;
+    $.hgraph.prototype.stop = function () {
+        do_loop=false;
+    };
 
     function animate() {
-        if (!animate_d) animate_d = new $.Deferred();
-        tot += opts.wait;
-        if (tot < opts.len) {
-            setInterval(randomColor, 5000);
+        if (do_loop) {
             randomHarmonograph();
-            setTimeout(animate, opts.wait);
-        } else {
-            animate_d.resolve();
+            requestAnimationFrame(animate, opts.canvas);
         }
-
-        return animate_d;
     }
 
     var A1 = 100, f1 = 2, p1 = 1 / 16, d1 = 0.02;
@@ -63,8 +52,8 @@
         opts.ctx.translate(opts.w/2, opts.h/2);
         opts.ctx.beginPath();
         for (var t = 0; t < 100; t += 0.01) {
-            var x = A1 * Math.sin(f1 * t + Math.PI * p1) * Math.exp(-d1 * t) + A2 * Math.sin(f2 * t + Math.PI * p2) * Math.exp(-d2 * t);
-            var y = A3 * Math.sin(f3 * t + Math.PI * p3) * Math.exp(-d3 * t) + A4 * Math.sin(f4 * t + Math.PI * p4) * Math.exp(-d4 * t);
+            var x = A1 * Math.sin(f1 * t + Math.PI * p1) * Math.exp(-d1 * t) + A2 * Math.sin(f2 * t + Math.PI * p2) * Math.exp(-d2 * t) * window.Dancer.getFrequency(10,50)*100;
+            var y = A3 * Math.sin(f3 * t + Math.PI * p3) * Math.exp(-d3 * t) + A4 * Math.sin(f4 * t + Math.PI * p4) * Math.exp(-d4 * t) * window.Dancer.getFrequency(10,50)*100;
             opts.ctx.lineTo(x, y);
         }
         opts.ctx.stroke();

@@ -15,7 +15,8 @@
         g_plasma,
         g_canvas,
         g_framestart,
-        tot=0, d,opts
+        do_loop=true,
+        opts
     ;
 
     $.plasma = function () {};
@@ -24,28 +25,24 @@
         g_canvas = opts.canvas;
         WIDTH = g_canvas.width;// = window.innerWidth;
         HEIGHT = g_canvas.height;// = window.innerHeight;
-        d = new $.Deferred();
 
         // create the Plasma object
         g_plasma = new Plasma();
 
         // init the animation loop
         g_framestart = Date.now();
-        setTimeout(function() {
-            requestAnimationFrame(loop, g_canvas);
-        }, 10);
 
-        return d;
+        loop();
+    };
+
+    $.plasma.prototype.stop = function() {
+        do_loop = false;
     };
 
     function loop() {
-        tot += opts.wait/5;
-        if (tot < opts.len) {
+        if (do_loop) {
             g_plasma.frame.call(g_plasma);
             requestAnimationFrame(loop, g_canvas);
-        }
-        else {
-            d.resolve();
         }
     }
 
@@ -136,13 +133,15 @@
                 ctx = g_canvas.getContext('2d'),
                 palette = this.palettes[this.PaletteIndex],
                 paletteoffset = this.paletteoffset += this.CycleSpeed,
-                plasmafun = this.PlasmaFunction;
+                plasmafun = this.PlasmaFunction,
+                uhuh=window.Dancer.getFrequency(0,50)*100
+                ;
             // scale the plasma source to the canvas width/height
-            var vpx = (w / pw), vpy = (h / ph);
+            var vpx = (w / pw)+uhuh, vpy = (h / ph)+uhuh;
 
             var dist = function dist(a, b, c, d) {
                 return Sqrt((a - c) * (a - c) + (b - d) * (b - d));
-            }
+            };
 
             var time = Date.now() / this.TimeFunction;
 

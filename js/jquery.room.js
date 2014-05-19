@@ -1,7 +1,7 @@
 (function ($) {
-    var canvas = document.getElementById("canv"),
+    var canvas = document.getElementById("canv_room"),
         ctx = canvas.getContext("2d"),
-        canvas_hidden = document.getElementById("canv_hidden"),
+        canvas_hidden = document.getElementById("canv_hidden_room"),
         ctx_hidden = canvas_hidden.getContext("2d"),
         w = canvas.width,
         h = canvas.height,
@@ -131,13 +131,15 @@
         wallpaper_objects = [],
         room_configs = ['lb', 'lr', 'rb'], // door: left and back (lb), left and right (lr), right and back (rb)
         active_config,
-        tune_idx= 0,
         visuals=[],
-        visuals_done=0
+        current_visual=0
     ;
 
     $.room = function() {};
     $.room.prototype.start = function () {
+        $('#canv_intro').hide();
+        $('#canv_hidden_intro').hide();
+        $('#canv_room').show();
         // load images
         $.when(loadWallpapers(), loadSprites()).then(function() {
             Modernizr.load({
@@ -155,18 +157,24 @@
                     visuals.push(new $.fractal_concentric);
                     visuals.push(new $.plasma);
                     visuals.push(new $.hgraph);
-                    doAll();
+//                    visuals.push(new $.plasma);
+//                    visuals.push(new $.plasma);
+//                    visuals.push(new $.plasma);
+//                    visuals.push(new $.plasma);
+                    $('#canv_room').on('switch', function() {
+                        visuals[current_visual].stop();
+                        current_visual++;
+                        doNext();
+                    });
+                    doNext();
                 }
             });
         });
     };
 
-    function doAll() {
-        // clear and fade in
-
+    function doNext() {
         // create room config
         active_config = room_configs[randomIntFromInterval(0, room_configs.length-1)];
-//                        active_config = 'lr';
 
         createRoom();
         createDoors();
@@ -199,12 +207,14 @@
                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
                 }))
                 .then(function() {
-                    $.when(doVisual()).then(function() {
-                        console.log('visual done');
-                        if (tune_idx++<4 && visuals_done < visuals.length) {
-                            setTimeout(doAll, 10);
-                        }
-                    });
+                        visuals[current_visual].start({
+                            w:w,
+                            h:h,
+                            ctx: ctx,
+                            canvas: canvas,
+                            len: len,
+                            wait: wait
+                        });
                 });
             });
         });
@@ -556,28 +566,6 @@
 
             timer.tick();
         }, sprites.spy.wait);
-
-        return d;
-    }
-
-    function doVisual() {
-        //return visuals.pop().start({
-        var d = new $.Deferred();
-        console.log([visuals_done, visuals.length]);
-        if (visuals_done < visuals.length) {
-            $.when(visuals[visuals_done].start({
-                w:w,
-                h:h,
-                ctx: ctx,
-                canvas: canvas,
-                len: len,
-                wait: wait
-            }))
-            .then(function() {
-                visuals_done++;
-                d.resolve();
-            });
-        } else d.resolve();
 
         return d;
     }

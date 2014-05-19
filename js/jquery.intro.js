@@ -1,8 +1,8 @@
 (function ($) {
     var freq = .01,
         amp = 8,
-        canvas = document.getElementById("canv"),
-        canvas_hidden = document.getElementById("canv_hidden"),
+        canvas = document.getElementById("canv_intro"),
+        canvas_hidden = document.getElementById("canv_hidden_intro"),
         ctx = canvas.getContext("2d"),
         ctx_hidden = canvas_hidden.getContext("2d"),
         w = canvas.width,
@@ -15,9 +15,7 @@
         texts = [
             "G'day fellow outliners",
             "This is a small demo",
-            "as a tribute to the one game we all love",
-            "(I really tried not to screw it up)",
-            "(with this being my first demo and all...)"
+            "as a tribute to the one game we all love"
         ],
         wait=18/texts.length,
         txt_idx= 0,
@@ -36,6 +34,9 @@
         var
             self = this
             ;
+
+        $('#canv_room').hide();
+        $('#canv_hidden_room').hide();
 
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, w, h);

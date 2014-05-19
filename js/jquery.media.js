@@ -24,20 +24,24 @@
                             self.demo.$intro.start();
                         })
                         .onceAt(23.2, function() {
-                            $.when(self.demo)
-                            console.log('end intro, start beat')
+                            $.when(self.demo.$room.start());
+                            console.log('end intro, start beat/room start')
                         })
                         .onceAt(46.3, function() {
-                            console.log('end intro, start tune1')
+                            console.log('end intro, start tune1/triggering switch')
+                            $('#canv_room').trigger('switch');
                         })
                         .onceAt(69.6, function() {
-                            console.log('end tune1, start tune2')
+                            console.log('end tune1, start tune2/triggering switch')
+                            $('#canv_room').trigger('switch');
                         })
                         .onceAt(92.7, function() {
-                            console.log('end tune2, start tune3')
+                            console.log('end tune2, start tune3/triggering switch')
+                            $('#canv_room').trigger('switch');
                         })
                         .onceAt(115.8, function() {
-                            console.log('end tune3, start tune4')
+                            console.log('end tune3, start tune4/triggering switch')
+                            $('#canv_room').trigger('switch');
                         })
                         .onceAt(138.9, function() {
                             console.log('end tune4, start outro1')
@@ -69,5 +73,26 @@
 
         return deferred;
     };
+
+    var last_time= 0, playing_d, last_time_cnt= 0, is_good=0;
+    function checkPlaying() {
+        if (!playing_d) playing_d=new $.Deferred(0)
+        if (last_time==0) {
+            window.Dancer.setVolume(0);
+            window.Dancer.play();
+            setTimeout(checkPlaying, 500);
+        } else {
+            last_time = window.Dancer.getTime();
+            if (last_time == window.Dancer.getTime()) {
+                if (last_time_cnt++ > 5) {
+                    document.location.href=document.location.href;
+                    playing_d.resolve();
+                }
+            } else {
+                is_good++;
+            }
+        }
+        return playing_d;
+    }
 
 }(jQuery));

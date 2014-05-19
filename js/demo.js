@@ -11,7 +11,7 @@
         var self = this;
         this.$media = new $.media(this);
         this.$intro = new $.intro(this);
-        this.$room = new $.room(this);
+        this.$room = new $.room();
         this.$outro = new $.outro(this);
     };
 

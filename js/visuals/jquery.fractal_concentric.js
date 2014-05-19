@@ -1,40 +1,32 @@
 (function ($) {
     var
-        tot= 0,
+        do_loop=true,
         opts
     ;
 
     $.fractal_concentric = function() {};
     $.fractal_concentric.prototype.start = function (_opts) {
-        tot=0;
         opts = _opts;
-        var d = new $.Deferred();
-        $.when(animate()).then(function() {
-            d.resolve();
-        });
-        return d;
+        animate();
     };
 
-    var animate_d;
-    function animate() {
-        if (!animate_d) animate_d = new $.Deferred();
-        tot += opts.wait;
-        if (tot<opts.len) {
-            generate();
-            setTimeout(animate, opts.wait);
-        } else {
-            animate_d.resolve();
-        }
+    $.fractal_concentric.prototype.stop = function() {
+        do_loop = false;
+    };
 
-        return animate_d;
+    function animate() {
+        if (do_loop) {
+            generate();
+             requestAnimationFrame(animate, opts.canvas);
+        }
     }
 
     function setLinePoints(iterations) {
 		var pointList = {};
 		pointList.first = {x:0, y:1};
-		var lastPoint = {x:1, y:1}
-		var minY = 1;
-		var maxY = 1;
+		var lastPoint = {x:1, y:1};
+		var minY = 10;
+		var maxY = 10;
 		var point;
 		var nextPoint;
 		var dx, newX, newY;
@@ -107,7 +99,7 @@
 
 		for (var i = 0; i < numCircles; i++) {
 			maxRad = 20 + (i+1)/numCircles*220;
-			minRad = 20 + (0.85+0.15*Math.random())*i/numCircles*220;
+                minRad = 20 + (0.85+0.15*(window.Dancer.getFrequency(10,50)*100)*i)/numCircles*220;
 
 			r = Math.floor(Math.random()*255);
 			g = Math.floor(Math.random()*255);

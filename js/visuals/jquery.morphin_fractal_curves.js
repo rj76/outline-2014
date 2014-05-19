@@ -1,6 +1,6 @@
 (function ($) {
     var
-        tot = 0,
+        do_loop=true,
         opts
         ;
 	var numCircles;
@@ -27,55 +27,38 @@
 
     $.fractal_curves = function () {};
     $.fractal_curves.prototype.start = function (_opts) {
-        tot = 0;
         opts = _opts;
-
         init();
-        window.effects.regionAlphaToMax({
-            x: 0, y: 0, w: opts.w, h: opts.h, ctx: opts.ctx, el: opts.canvas
-        });
-
-        var d = new $.Deferred();
-        $.when(animate()).then(function () {
-            d.resolve();
-        });
-        return d;
+        animate();
+    };
+    $.fractal_curves.prototype.stop = function() {
+        do_loop = false;
     };
 
-    var animate_d;
     function animate() {
-        if (!animate_d) animate_d = new $.Deferred();
-        tot += opts.wait;
-        if (tot < opts.len*10) {
+        if (do_loop) {
             lineNumber++;
-//            init();
     		colorArray = setColorList(iterations);
             create();
-            setTimeout(animate, opts.wait);
-        } else {
-            console.log([lineNumber, tot, opts.wait, opts.len]);
-            console.log('animate done');
-            animate_d.resolve();
+             requestAnimationFrame(animate, opts.canvas);
         }
-
-        return animate_d;
     }
 
 	function init() {
-		numCircles = 40;
+		numCircles = 20;
 		maxMaxRad = 200;
 		minMaxRad = 200;
 		minRadFactor = 0;
 		iterations = 11;
 		numPoints = Math.pow(2,iterations)+1;
-		drawsPerFrame = 4;
+		drawsPerFrame = 8;
 
 		fullTurn = Math.PI*2*numPoints/(1+numPoints);
 
 		minX = -maxMaxRad;
 		maxX = opts.w + maxMaxRad;
-		minY = opts.h/2;
-		maxY = opts.h/2;
+		minY = opts.h/2+100;
+		maxY = opts.h/2-100;
 
 		twistAmount = 0.6*Math.PI*2;
 
@@ -189,7 +172,8 @@
 		var linParam;
 		var cosParam;
 		var centerX, centerY;
-		var xSqueeze = Math.random()+1;//1.5;
+//		var xSqueeze = Math.random()*.1;//1.5;
+        var xSqueeze = window.Dancer.getFrequency(10,50)*100;
 		var x0,y0;
 		var rad, rad0, rad1;
 		var phase, phase0, phase1;
