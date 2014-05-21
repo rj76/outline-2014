@@ -15,7 +15,9 @@
         texts = [
             "G'day fellow outliners",
             "This is a small demo",
-            "as a tribute to the one game we all love"
+            "as a tribute to the one game we all love",
+            "or comics...",
+            "or television..."
         ],
         wait=18/texts.length,
         txt_idx= 0,
@@ -24,7 +26,6 @@
 
     ctx.globalCompositeOperation = 'copy';
     ctx_hidden.globalCompositeOperation = 'copy';
-
 
     $.intro = function (demo) {
         this.demo = demo;
