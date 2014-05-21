@@ -13,6 +13,7 @@
         this.$intro = new $.intro(this);
         this.$room = new $.room();
         this.$outro = new $.outro(this);
+        this.$room.init();
     };
 
     $.demo.prototype.run = function () {

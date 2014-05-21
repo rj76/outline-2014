@@ -54,8 +54,7 @@
                     { x: 10-0.8, y: 2 }
                 ],
                 sprite: {
-                    x: 8.6,
-                    y: 3
+                    x: 8.6, y: 3
                 }
             },
             back_left: {
@@ -66,8 +65,7 @@
                     { x: 3, y: .8 }
                 ],
                 sprite: {
-                    x: 3.2,
-                    y: 2.5
+                    x: 3.2, y: 2.5
                 }
             },
             back_right: {
@@ -78,12 +76,13 @@
                     { x: 6, y: .8 }
                 ],
                 sprite: {
-                    x: 6.2,
-                    y: 2.5
+                    x: 6.2, y: 2.5
                 }
             }
         },
         sprites = {
+            num_images: 0,
+            num_objects: 0,
             spy: {
                 speed: 1,
                 zoom: 1.3,
@@ -92,29 +91,60 @@
                 num_images: 0,
                 num_objects: 0,
                 punch_right: {
-                    s_w: 28,
-                    s_h: 37,
+                    s_w: 28, s_h: 37,
                     img: 'img/sprites/punch-right.png'
                 },
                 walk_left: {
-                    s_w: 32,
-                    s_h: 37,
+                    s_w: 32, s_h: 37,
                     img: 'img/sprites/walk-left.png'
                 },
                 walk_right: {
-                    s_w: 32,
-                    s_h: 37,
+                    s_w: 32, s_h: 37,
                     img: 'img/sprites/walk-right.png'
                 },
                 walk_bw: {
-                    s_w: 25,
-                    s_h: 36,
+                    s_w: 25, s_h: 36,
                     img: 'img/sprites/walk-bw.png'
                 },
                 walk_fw: {
-                    s_w: 25,
-                    s_h: 36,
+                    s_w: 25, s_h: 36,
                     img: 'img/sprites/walk-fw.png'
+                }
+            },
+            qm: {
+                speed: 1,
+                zoom: 1.3,
+                time: 0.2,
+                wait: 5,
+                num_images: 0,
+                num_objects: 0,
+                qm: {
+                    s_w: 50, s_h: 50,
+                    img: 'img/sprites/question-mk-50px.png'
+                }
+            },
+            cat: {
+                speed: 1,
+                zoom: 1.3,
+                time: 0.2,
+                wait: 5,
+                num_images: 0,
+                num_objects: 0,
+                walk_left: {
+                    s_w: 32, s_h: 33,
+                    img: 'img/sprites/cat-left.png'
+                },
+                walk_right: {
+                    s_w: 32, s_h: 33,
+                    img: 'img/sprites/cat-right.png'
+                },
+                walk_bw: {
+                    s_w: 32, s_h: 33,
+                    img: 'img/sprites/cat-bw.png'
+                },
+                walk_fw: {
+                    s_w: 32, s_h: 33,
+                    img: 'img/sprites/cat-fw.png'
                 }
             }
         },
@@ -131,15 +161,12 @@
         wallpaper_objects = [],
         room_configs = ['lb', 'lr', 'rb'], // door: left and back (lb), left and right (lr), right and back (rb)
         active_config,
-        visuals=[],
-        current_visual=0
+        visuals=[], intro_steps=[],
+        current_visual =0, current_intro_step=0
     ;
 
     $.room = function() {};
-    $.room.prototype.start = function () {
-        $('#canv_intro').hide();
-        $('#canv_hidden_intro').hide();
-        $('#canv_room').show();
+    $.room.prototype.init = function () {
         // load images
         $.when(loadWallpapers(), loadSprites()).then(function() {
             Modernizr.load({
@@ -157,22 +184,155 @@
                     visuals.push(new $.fractal_concentric);
                     visuals.push(new $.plasma);
                     visuals.push(new $.hgraph);
-//                    visuals.push(new $.plasma);
-//                    visuals.push(new $.plasma);
-//                    visuals.push(new $.plasma);
-//                    visuals.push(new $.plasma);
-                    $('#canv_room').on('switch', function() {
-                        visuals[current_visual].stop();
-                        current_visual++;
-                        doNext();
+
+                    $('#canv_room').on('room_intro_plusplus', function() {
+                        $('#canv_intro').hide();
+                        $('#canv_hidden_intro').hide();
+                        $('#canv_room').show();
+                        intro_steps[current_intro_step++]();
                     });
-                    doNext();
+
+                    $('#canv_room').on('switch_visual', function() {
+                        visuals[current_visual].stop();
+                        if (current_visual++ >= visuals.length) current_visual = 0;
+                        doNextVisual();
+                    });
+
+                    $('#canv_room').on('start_visuals', function() {
+                        doNextVisual();
+                    });
                 }
             });
         });
     };
 
-    function doNext() {
+    /*
+        Room spy & cat intro
+     */
+    intro_steps.push(function() {
+        // 1) spy from left to center-10 or so, face front, show question mark, walk out
+        // deze duurt 5.75 @ 23.2
+        createRoom();
+        createDoorLeft();
+
+        base_img = ctx.getImageData(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
+        ctx_hidden.putImageData(base_img, 0, 0);
+
+        $.when(window.effects.regionAlphaToMaxCenterX({
+            ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+        }))
+        .then(function() {
+            // move sprite through room
+            $.when(moveSpy()).then(function() {
+                $.when(window.effects.regionAlphaToMinCenterY({
+                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                }))
+            });
+        });
+    });
+
+    intro_steps.push(function() {
+        // 2) cat from right to center-something, face front, show question mark, walk out
+        // deze duurt 5.75 @ 28,95
+        createRoom();
+        createDoorRight();
+
+        base_img = ctx.getImageData(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
+        ctx_hidden.putImageData(base_img, 0, 0);
+
+        $.when(window.effects.regionAlphaToMaxCenterX({
+            ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+        }))
+        .then(function() {
+            // move sprite through room
+            $.when(moveSpy()).then(function() {
+                $.when(window.effects.regionAlphaToMinCenterY({
+                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                }))
+            });
+        });
+    });
+
+    intro_steps.push(function() {
+        // 3) spy moves through room w/ paintings, left to right
+        // deze duurt 2.875 @ 31,825
+        active_config = 'lr';
+
+        createRoom();
+        createDoors();
+
+        base_img = ctx.getImageData(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
+        ctx_hidden.putImageData(base_img, 0, 0);
+
+        $.when(window.effects.regionAlphaToMaxCenterX({
+            ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+        }))
+        .then(function() {
+            // move sprite through room
+            $.when(moveSpy()).then(function() {
+                $.when(window.effects.regionAlphaToMinCenterY({
+                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                }))
+            });
+        });
+    });
+
+    intro_steps.push(function () {
+        // 4) cat moves through room w/ paintings, right to left
+        // deze duurt 2.875 @ 34,7
+        active_config = 'lr';
+
+        createRoom();
+        createDoors();
+
+        base_img = ctx.getImageData(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
+        ctx_hidden.putImageData(base_img, 0, 0);
+
+        $.when(window.effects.regionAlphaToMaxCenterX({
+            ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+        }))
+        .then(function() {
+            // move sprite through room
+            $.when(moveSpy()).then(function() {
+                $.when(window.effects.regionAlphaToMinCenterY({
+                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                }))
+            });
+        });
+    });
+
+    intro_steps.push(function () {
+        // 5) spy from left, cat from right, they meet: love, they both walk out
+        // deze duurt 5.75 + 2.875 @ 43,325
+        createRoom();
+        createDoorLeft();
+        createDoorRight();
+
+        base_img = ctx.getImageData(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
+        ctx_hidden.putImageData(base_img, 0, 0);
+
+        $.when(window.effects.regionAlphaToMaxCenterX({
+            ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
+        }))
+        .then(function() {
+            // move sprite through room
+            $.when(moveSpy()).then(function() {
+                $.when(window.effects.regionAlphaToMinCenterY({
+                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                }))
+            });
+        });
+    });
+
+    /*
+        Visuals
+     */
+    function doNextVisual() {
         // create room config
         active_config = room_configs[randomIntFromInterval(0, room_configs.length-1)];
 
@@ -234,20 +394,33 @@
     }
 
     function loadSprites() {
-        var d = new $.Deferred(), a = [], name;
-        for(name in sprites.spy) if (typeof sprites.spy[name].img != 'undefined') a.push(sprites.spy[name].img);
-        sprites.spy.num_images = a.length;
-        for(name in sprites.spy) {
-            if (typeof sprites.spy[name].img == 'undefined') continue;
-            var img = new Image();
-            img.onload = function() {
-                sprites.spy.num_objects++;
-                if (sprites.spy.num_objects==sprites.spy.num_images) d.resolve();
-            };
-            img.src = sprites.spy[name].img;
-
-            sprites.spy[name].object = img;
+        var d = new $.Deferred(), s, a = [], section, name;
+        for (section in sprites) {
+            s = [];
+            for(name in sprites[section]) {
+                if (typeof sprites[section][name].img != 'undefined') {
+                    s.push(sprites[section][name].img)
+                    a.push(sprites[section][name].img);
+                }
+            }
+            sprites[section].num_images = s.length;
         }
+        sprites.num_images = a.length;
+
+        for (section in sprites) {
+            for(name in sprites[section]) {
+                if (typeof sprites[section][name].img == 'undefined') continue;
+                var img = new Image();
+                img.onload = function() {
+                    sprites.num_objects++;
+                    if (sprites.num_objects==sprites.num_images) d.resolve();
+                };
+                img.src = sprites[section][name].img;
+
+                sprites[section][name].object = img;
+            }
+        }
+
         return d;
     }
 
@@ -336,44 +509,63 @@
         ctx.stroke();
     }
 
+    /*
+        Doooooooooooooors
+     */
     function createDoors() {
         ctx.fillStyle = '#000';
 
         if (active_config=='lb' || active_config=='lr') {
-            ctx.beginPath();
-            ctx.moveTo(doors.left.coords[0].x*zoom+offset_left, doors.left.coords[0].y*zoom+offset_left);
-            for(var i=0;i<doors.left.coords.length;i++) {
-                ctx.lineTo(doors.left.coords[i].x*zoom+offset_left, doors.left.coords[i].y*zoom+top);
-            }
-            ctx.fill();
+            createDoorLeft();
         }
 
         if (active_config=='rb' || active_config=='lr') {
-            ctx.beginPath();
-            ctx.moveTo(doors.right.coords[0].x*zoom+offset_left, doors.right.coords[0].y*zoom+offset_left);
-            for(var i=0;i<doors.right.coords.length;i++) {
-                ctx.lineTo(doors.right.coords[i].x*zoom+offset_left, doors.right.coords[i].y*zoom+top);
-            }
-            ctx.fill();
+            createDoorRight();
         }
 
         if (active_config=='rb') {
-            ctx.beginPath();
-            ctx.moveTo(doors.back_left.coords[0].x*zoom+offset_left, doors.back_left.coords[0].y*zoom+offset_left);
-            for(var i=0;i<doors.back_left.coords.length;i++) {
-                ctx.lineTo(doors.back_left.coords[i].x*zoom+offset_left, doors.back_left.coords[i].y*zoom+top);
-            }
-            ctx.fill();
+            createDoorBackLeft();
         }
 
         if (active_config=='lb') {
-            ctx.beginPath();
-            ctx.moveTo(doors.back_right.coords[0].x*zoom+offset_left, doors.back_right.coords[0].y*zoom+offset_left);
-            for(var i=0;i<doors.back_right.coords.length;i++) {
-                ctx.lineTo(doors.back_right.coords[i].x*zoom+offset_left, doors.back_right.coords[i].y*zoom+top);
-            }
-            ctx.fill();
+            createDoorBackRight();
         }
+    }
+
+    function createDoorLeft() {
+        ctx.beginPath();
+        ctx.moveTo(doors.left.coords[0].x*zoom+offset_left, doors.left.coords[0].y*zoom+offset_left);
+        for(var i=0;i<doors.left.coords.length;i++) {
+            ctx.lineTo(doors.left.coords[i].x*zoom+offset_left, doors.left.coords[i].y*zoom+top);
+        }
+        ctx.fill();
+    }
+
+    function createDoorRight() {
+        ctx.beginPath();
+        ctx.moveTo(doors.right.coords[0].x*zoom+offset_left, doors.right.coords[0].y*zoom+offset_left);
+        for(var i=0;i<doors.right.coords.length;i++) {
+            ctx.lineTo(doors.right.coords[i].x*zoom+offset_left, doors.right.coords[i].y*zoom+top);
+        }
+        ctx.fill();
+    }
+
+    function createDoorBackLeft() {
+        ctx.beginPath();
+        ctx.moveTo(doors.back_left.coords[0].x*zoom+offset_left, doors.back_left.coords[0].y*zoom+offset_left);
+        for(var i=0;i<doors.back_left.coords.length;i++) {
+            ctx.lineTo(doors.back_left.coords[i].x*zoom+offset_left, doors.back_left.coords[i].y*zoom+top);
+        }
+        ctx.fill();
+    }
+
+    function createDoorBackRight() {
+        ctx.beginPath();
+        ctx.moveTo(doors.back_right.coords[0].x*zoom+offset_left, doors.back_right.coords[0].y*zoom+offset_left);
+        for(var i=0;i<doors.back_right.coords.length;i++) {
+            ctx.lineTo(doors.back_right.coords[i].x*zoom+offset_left, doors.back_right.coords[i].y*zoom+top);
+        }
+        ctx.fill();
     }
 
     function moveSpy() {
@@ -570,4 +762,220 @@
         return d;
     }
 
+    function moveCat() {
+        var x, y, end_x, end_y, d = new $.Deferred();
+        switch(movement) {
+            case 'lr':
+                // left to right
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+doors.right.sprite.x*zoom;
+                $.when(moveCatRight({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    })).then(function() {
+                        d.resolve();
+                });
+                break;
+            case 'lc':
+                // left to center
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+((doors.right.sprite.x*zoom)/2);
+                $.when(moveCatRight({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    })).then(function() {
+                        d.resolve();
+                });
+                break;
+
+            case 'rb':
+                // right to back left
+                x = doors.right.sprite.x*zoom+offset_left;
+                y = top+doors.right.sprite.y*zoom;
+                end_x = offset_left+doors.back_left.sprite.x*zoom;
+                end_y = doors.back_left.sprite.y*zoom;
+                $.when(moveCatLeft({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    }))
+                    .then(function() {
+                        $.when(moveCatBack({
+                            x: end_x,
+                            end_y: end_y,
+                            y: y
+                        }))
+                        .then(function() {
+                            d.resolve();
+                        });
+                    });
+                break;
+            case 'lb':
+                // left to back right
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+doors.back_right.sprite.x*zoom;
+                end_y = doors.back_right.sprite.y*zoom;
+                $.when(moveCatRight({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    }))
+                    .then(function() {
+                        $.when(moveCatBack({
+                            x: end_x,
+                            end_y: end_y,
+                            y: y
+                        }))
+                        .then(function() {
+                            d.resolve();
+                        });
+                    });
+                break;
+        }
+
+        return d;
+    }
+
+    function moveCatRight(opts) {
+        var
+            d = new $.Deferred(),
+            timer = new FrameTimer(),
+            spritesheet = new SpriteSheet({
+                width: sprites.cat.walk_right.s_w,
+                height: sprites.cat.walk_right.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 },
+                    { name: 'fr_3', x: 0, y: 0 }
+                ]
+            }),
+            animation = new Animation([
+                    { sprite: 'fr_1', time: sprites.cat.time },
+                    { sprite: 'fr_2', time: sprites.cat.time },
+                    { sprite: 'fr_3', time: sprites.cat.time }
+            ], spritesheet)
+        ;
+
+        var t = setInterval(function() {
+            opts.x += sprites.cat.speed;
+            if (opts.x>=opts.end_x) {
+                clearTimeout(t);
+                d.resolve();
+                return;
+            }
+
+            animation.animate(timer.getSeconds());
+            var frame = animation.getSprite();
+            ctx.clearRect(0, 0, w, h);
+            ctx.putImageData(base_img, 0, 0);
+            ctx.drawImage(
+                sprites.cat.walk_right.object,
+                frame.x, frame.y,
+                sprites.cat.walk_right.s_w, sprites.cat.walk_right.s_h,
+                opts.x, opts.y,
+                sprites.cat.walk_right.s_w, sprites.cat.walk_right.s_h
+            );
+
+            timer.tick();
+        }, sprites.cat.wait);
+
+        return d;
+    }
+
+    function moveCatBack(opts) {
+        var
+            d = new $.Deferred(),
+            timer = new FrameTimer(),
+            spritesheet = new SpriteSheet({
+                width: sprites.cat.walk_bw.s_w,
+                height: sprites.cat.walk_bw.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 },
+                    { name: 'fr_3', x: 0, y: 0 }
+                ]
+            }),
+            animation = new Animation([
+                { sprite: 'fr_1', time: sprites.cat.time },
+                { sprite: 'fr_2', time: sprites.cat.time },
+                { sprite: 'fr_3', time: sprites.cat.time }
+            ], spritesheet)
+        ;
+
+        var t = setInterval(function() {
+            opts.y -= sprites.cat.speed;
+            if (opts.y<=opts.end_y) {
+                clearTimeout(t);
+                d.resolve();
+                return;
+            }
+
+            animation.animate(timer.getSeconds());
+            var frame = animation.getSprite();
+            ctx.clearRect(0, 0, w, h);
+            ctx.putImageData(base_img, 0, 0);
+            ctx.drawImage(
+                sprites.cat.walk_bw.object,
+                frame.x, frame.y,
+                sprites.cat.walk_bw.s_w, sprites.cat.walk_bw.s_h,
+                opts.x, opts.y,
+                sprites.cat.walk_bw.s_w, sprites.cat.walk_bw.s_h
+            );
+
+            timer.tick();
+        }, sprites.cat.wait);
+
+        return d;
+    }
+
+    function moveCatLeft(opts) {
+        var
+            d = new $.Deferred(),
+            timer = new FrameTimer(),
+            spritesheet = new SpriteSheet({
+                width: sprites.cat.walk_left.s_w,
+                height: sprites.cat.walk_left.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 },
+                    { name: 'fr_3', x: 0, y: 0 }
+                ]
+            }),
+            animation = new Animation([
+                    { sprite: 'fr_1', time: sprites.cat.time },
+                    { sprite: 'fr_2', time: sprites.cat.time },
+                    { sprite: 'fr_3', time: sprites.cat.time }
+            ], spritesheet)
+        ;
+
+        var t = setInterval(function() {
+            opts.x -= sprites.cat.speed;
+            if (opts.x<=opts.end_x) {
+                clearTimeout(t);
+                d.resolve();
+                return;
+            }
+
+            animation.animate(timer.getSeconds());
+            var frame = animation.getSprite();
+            ctx.clearRect(0, 0, w, h);
+            ctx.putImageData(base_img, 0, 0);
+            ctx.drawImage(
+                sprites.cat.walk_left.object,
+                frame.x, frame.y,
+                sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h,
+                opts.x, opts.y,
+                sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h
+            );
+
+            timer.tick();
+        }, sprites.cat.wait);
+
+        return d;
+    }
 })(jQuery);
