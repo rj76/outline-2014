@@ -14,12 +14,12 @@
         a=255,
         texts = [
             "G'day fellow outliners",
-            "This is a small demo",
-            "as a tribute to the one game we all love",
+            "This small demo",
+            "is a tribute to the one game we all love",
             "or comics...",
             "or television..."
         ],
-        wait=18/texts.length,
+        wait=22/texts.length,
         txt_idx= 0,
         alpha
     ;
@@ -108,7 +108,6 @@
     }
 
     function doImage() {
-        console.log('calling window.effects.regionAlphaToMinCenter');
         $.when(window.effects.regionAlphaToMinCenterY({
             ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
         }))
@@ -130,7 +129,7 @@
                                 window.effects.regionAlphaToMinCenterY({
                                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
                                 });
-                            }, 1000)
+                            }, 1500)
                     });
             };
             img.src = 'img/svs-sm.png';

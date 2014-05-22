@@ -85,7 +85,6 @@
             num_objects: 0,
             spy: {
                 speed: 1,
-                zoom: 1.3,
                 time: 0.2,
                 wait: 5,
                 num_images: 0,
@@ -113,7 +112,6 @@
             },
             qm: {
                 speed: 1,
-                zoom: 1.3,
                 time: 0.2,
                 wait: 5,
                 num_images: 0,
@@ -125,7 +123,6 @@
             },
             cat: {
                 speed: 1,
-                zoom: 1.3,
                 time: 0.2,
                 wait: 5,
                 num_images: 0,
@@ -159,10 +156,11 @@
             'img/wall/alpacafluffy.jpg'
         ],
         wallpaper_objects = [],
-        room_configs = ['lb', 'lr', 'rb'], // door: left and back (lb), left and right (lr), right and back (rb)
+        room_configs = ['l', 'lb', 'lr', 'rl', 'rb', 'r'],// door: left and back (lb), left and right (lr), right and back (rb), etc.
         active_config,
         visuals=[], intro_steps=[],
-        current_visual =0, current_intro_step=0
+        current_visual =0, current_intro_step= 0,
+        $canvas = $('#canv_room')
     ;
 
     $.room = function() {};
@@ -185,20 +183,21 @@
                     visuals.push(new $.plasma);
                     visuals.push(new $.hgraph);
 
-                    $('#canv_room').on('room_intro_plusplus', function() {
+                    $canvas.on('room_intro_plusplus', function() {
                         $('#canv_intro').hide();
                         $('#canv_hidden_intro').hide();
                         $('#canv_room').show();
-                        intro_steps[current_intro_step++]();
+                        if (current_intro_step < intro_steps.length) intro_steps[current_intro_step++]();
                     });
 
-                    $('#canv_room').on('switch_visual', function() {
+                    $canvas.on('switch_visual', function() {
                         visuals[current_visual].stop();
-                        if (current_visual++ >= visuals.length) current_visual = 0;
+                        current_visual++;
+                        if (current_visual == visuals.length-1) current_visual = 0;
                         doNextVisual();
                     });
 
-                    $('#canv_room').on('start_visuals', function() {
+                    $canvas.on('start_visuals', function() {
                         doNextVisual();
                     });
                 }
@@ -212,8 +211,11 @@
     intro_steps.push(function() {
         // 1) spy from left to center-10 or so, face front, show question mark, walk out
         // deze duurt 5.75 @ 23.2
+        console.log('intro step 1');
+        active_config = 'l';
         createRoom();
-        createDoorLeft();
+        createDoors();
+        createPaintings();
 
         base_img = ctx.getImageData(0, 0, w, h);
         ctx.clearRect(0, 0, w, h);
@@ -225,9 +227,9 @@
         .then(function() {
             // move sprite through room
             $.when(moveSpy()).then(function() {
-                $.when(window.effects.regionAlphaToMinCenterY({
+                window.effects.regionAlphaToMinCenterY({
                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                }))
+                });
             });
         });
     });
@@ -235,8 +237,11 @@
     intro_steps.push(function() {
         // 2) cat from right to center-something, face front, show question mark, walk out
         // deze duurt 5.75 @ 28,95
+        console.log('intro step 2');
+        active_config = 'r';
         createRoom();
-        createDoorRight();
+        createDoors();
+        createPaintings();
 
         base_img = ctx.getImageData(0, 0, w, h);
         ctx.clearRect(0, 0, w, h);
@@ -247,10 +252,10 @@
         }))
         .then(function() {
             // move sprite through room
-            $.when(moveSpy()).then(function() {
-                $.when(window.effects.regionAlphaToMinCenterY({
+            $.when(moveCat()).then(function() {
+                window.effects.regionAlphaToMinCenterY({
                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                }))
+                });
             });
         });
     });
@@ -258,10 +263,12 @@
     intro_steps.push(function() {
         // 3) spy moves through room w/ paintings, left to right
         // deze duurt 2.875 @ 31,825
+        console.log('intro step 3');
         active_config = 'lr';
 
         createRoom();
         createDoors();
+        createPaintings();
 
         base_img = ctx.getImageData(0, 0, w, h);
         ctx.clearRect(0, 0, w, h);
@@ -273,9 +280,9 @@
         .then(function() {
             // move sprite through room
             $.when(moveSpy()).then(function() {
-                $.when(window.effects.regionAlphaToMinCenterY({
+                window.effects.regionAlphaToMinCenterY({
                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                }))
+                });
             });
         });
     });
@@ -283,10 +290,12 @@
     intro_steps.push(function () {
         // 4) cat moves through room w/ paintings, right to left
         // deze duurt 2.875 @ 34,7
-        active_config = 'lr';
+        console.log('intro step 4');
+        active_config = 'rl';
 
         createRoom();
         createDoors();
+        createPaintings();
 
         base_img = ctx.getImageData(0, 0, w, h);
         ctx.clearRect(0, 0, w, h);
@@ -297,10 +306,10 @@
         }))
         .then(function() {
             // move sprite through room
-            $.when(moveSpy()).then(function() {
-                $.when(window.effects.regionAlphaToMinCenterY({
+            $.when(moveCat()).then(function() {
+                window.effects.regionAlphaToMinCenterY({
                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                }))
+                });
             });
         });
     });
@@ -308,9 +317,12 @@
     intro_steps.push(function () {
         // 5) spy from left, cat from right, they meet: love, they both walk out
         // deze duurt 5.75 + 2.875 @ 43,325
+        console.log('intro step 5');
+        active_config = 'spy-l-cat-r';
+
         createRoom();
-        createDoorLeft();
-        createDoorRight();
+        createDoors();
+        createPaintings();
 
         base_img = ctx.getImageData(0, 0, w, h);
         ctx.clearRect(0, 0, w, h);
@@ -321,10 +333,13 @@
         }))
         .then(function() {
             // move sprite through room
-            $.when(moveSpy()).then(function() {
-                $.when(window.effects.regionAlphaToMinCenterY({
-                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                }))
+            $.when(moveSpy(), moveCat()).then(function() {
+                active_config = 'spy-cat-left';
+                $.when(moveSpy(), moveCat()).then(function() {
+                    window.effects.regionAlphaToMinCenterY({
+                        ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                    });
+                });
             });
         });
     });
@@ -338,20 +353,7 @@
 
         createRoom();
         createDoors();
-
-        switch(active_config) {
-            case 'lb':
-                createPainting(2.5*zoom);
-                break;
-            case 'lr':
-                createPainting(2.5*zoom);
-                createPainting(5.5*zoom);
-                break;
-
-            case 'rb':
-                createPainting(5.5*zoom);
-                break;
-        }
+        createPaintings();
 
         base_img = ctx.getImageData(0, 0, w, h);
         ctx.clearRect(0, 0, w, h);
@@ -380,6 +382,9 @@
         });
     }
 
+    /*
+        General
+     */
     function loadWallpapers() {
         var d = new $.Deferred();
         for(var i=0;i<wallpapers.length;i++) {
@@ -454,6 +459,29 @@
         return Math.floor(Math.random()*(max-min+1)+min);
     }
 
+    /*
+        Paintings
+     */
+    function createPaintings() {
+        switch(active_config) {
+            case 'lb':
+                createPainting(2.5*zoom);
+                break;
+            case 'spy-l-cat-r':
+            case 'lr':
+            case 'rl':
+            case 'r':
+            case 'l':
+                createPainting(2.5*zoom);
+                createPainting(5.5*zoom);
+                break;
+
+            case 'rb':
+                createPainting(5.5*zoom);
+                break;
+        }
+    }
+
     function createPainting(offset_x) {
         var
             idx = Math.floor(Math.random()*(wallpaper_objects.length-1)+1),
@@ -515,11 +543,11 @@
     function createDoors() {
         ctx.fillStyle = '#000';
 
-        if (active_config=='lb' || active_config=='lr') {
+        if (active_config=='lb' || active_config=='lr' || active_config=='l' || active_config=='rl' || active_config=='spy-l-cat-r') {
             createDoorLeft();
         }
 
-        if (active_config=='rb' || active_config=='lr') {
+        if (active_config=='rb' || active_config=='lr' || active_config=='r' || active_config=='rl' || active_config=='spy-l-cat-r') {
             createDoorRight();
         }
 
@@ -568,10 +596,72 @@
         ctx.fill();
     }
 
+    /*
+        Spy sprite movements
+     */
     function moveSpy() {
         var x, y, end_x, end_y, d = new $.Deferred();
         switch(active_config) {
+            case 'spy-l-cat-r':
+                // move from left door to center and back
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2-40;
+                $.when(moveSpyRight({
+                    x: x,
+                    end_x: end_x,
+                    y: y
+                }))
+                .then(function() {
+                    d.resolve();
+                });
+                break;
+            case 'l':
+                // move from left door to center and back
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2-40;
+                $.when(moveSpyRight({
+                    x: x,
+                    end_x: end_x,
+                    y: y
+                }))
+                .then(function() {
+                    // insert question mark sprite for 1 second or so
+                    $.when(moveSpyLeft({
+                        x: end_x,
+                        end_x: x,
+                        y: y
+                    }))
+                    .then(function() {
+                        d.resolve();
+                    });
+                });
+                break;
+            case 'r':
+                // move from right door to center and back
+                x = doors.right.sprite.x*zoom+offset_left;
+                y = top+doors.right.sprite.y*zoom;
+                end_x = offset_left+(doors.left.sprite.x*zoom)/2+40;
+                $.when(moveSpyLeft({
+                    x: x,
+                    end_x: end_x,
+                    y: y
+                }))
+                .then(function() {
+                    // insert question mark sprite for 1 second or so
+                    $.when(moveSpyRight({
+                        x: end_x,
+                        end_x: x,
+                        y: y
+                    }))
+                    .then(function() {
+                        d.resolve();
+                    });
+                });
+                break;
             case 'lr':
+                // move from left door to right door
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.right.sprite.x*zoom;
@@ -583,7 +673,21 @@
                         d.resolve();
                 });
                 break;
+            case 'rl':
+                // move from left door to right door
+                x = doors.right.sprite.x*zoom+offset_left;
+                y = top+doors.right.sprite.y*zoom;
+                end_x = offset_left+doors.left.sprite.x*zoom;
+                $.when(moveSpyLeft({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    })).then(function() {
+                        d.resolve();
+                });
+                break;
             case 'rb':
+                // move from right door to left back
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+doors.back_left.sprite.x*zoom;
@@ -605,6 +709,7 @@
                     });
                 break;
             case 'lb':
+                // move from left door to right back
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.back_right.sprite.x*zoom;
@@ -762,15 +867,89 @@
         return d;
     }
 
+    /*
+        Cat sprite movements
+     */
     function moveCat() {
         var x, y, end_x, end_y, d = new $.Deferred();
-        switch(movement) {
+        switch(active_config) {
+            case 'spy-l-cat-r':
+                // move from right door to center
+                x = doors.right.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2+40;
+                $.when(moveCatLeft({
+                    x: x,
+                    end_x: end_x,
+                    y: y
+                }))
+                .then(function() {
+                    d.resolve();
+                });
+                break;
+            case 'l':
+                // move from left door to center and back
+                x = doors.left.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2-40;
+                $.when(moveCatRight({
+                    x: x,
+                    end_x: end_x,
+                    y: y
+                }))
+                .then(function() {
+                    // insert question mark sprite for 1 second or so
+                    $.when(moveCatLeft({
+                        x: end_x,
+                        end_x: x,
+                        y: y
+                    }))
+                    .then(function() {
+                        d.resolve();
+                    });
+                });
+                break;
+            case 'r':
+                // move from right door to center and back
+                x = doors.right.sprite.x*zoom+offset_left;
+                y = top+doors.right.sprite.y*zoom;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2;
+                $.when(moveCatLeft({
+                    x: x,
+                    end_x: end_x,
+                    y: y
+                }))
+                .then(function() {
+                    // insert question mark sprite for 1 second or so
+                    $.when(moveCatRight({
+                        x: end_x,
+                        end_x: x,
+                        y: y
+                    }))
+                    .then(function() {
+                        d.resolve();
+                    });
+                });
+                break;
             case 'lr':
                 // left to right
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.right.sprite.x*zoom;
                 $.when(moveCatRight({
+                        x: x,
+                        end_x: end_x,
+                        y: y
+                    })).then(function() {
+                        d.resolve();
+                });
+                break;
+            case 'rl':
+                // right to left
+                x = doors.right.sprite.x*zoom+offset_left;
+                y = top+doors.left.sprite.y*zoom;
+                end_x = offset_left+doors.left.sprite.x*zoom;
+                $.when(moveCatLeft({
                         x: x,
                         end_x: end_x,
                         y: y
@@ -978,4 +1157,9 @@
 
         return d;
     }
+
+    /*
+        Questionmark sprites
+     */
+
 })(jQuery);
