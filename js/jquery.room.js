@@ -114,9 +114,14 @@
                 speed: 1,
                 time: 0.2,
                 wait: 5,
+                length: 1000,
                 num_images: 0,
                 num_objects: 0,
-                qm: {
+                qm_r: {
+                    s_w: 50, s_h: 50,
+                    img: 'img/sprites/question-mk-50px.png'
+                },
+                qm_l: {
                     s_w: 50, s_h: 50,
                     img: 'img/sprites/question-mk-50px.png'
                 }
@@ -628,14 +633,21 @@
                 }))
                 .then(function() {
                     // insert question mark sprite for 1 second or so
-                    $.when(moveSpyLeft({
-                        x: end_x,
-                        end_x: x,
-                        y: y
+                    $.when(showQuestionmark({
+                        x: offset_left+(doors.right.sprite.x*zoom)/2-20,
+                        y: top+(doors.left.sprite.y*zoom)-50
                     }))
                     .then(function() {
-                        d.resolve();
-                    });
+                        $.when(moveSpyLeft({
+                            x: end_x,
+                            end_x: x,
+                            y: y
+                        }))
+                        .then(function() {
+                            d.resolve();
+                        });
+
+                        })
                 });
                 break;
             case 'r':
@@ -650,13 +662,19 @@
                 }))
                 .then(function() {
                     // insert question mark sprite for 1 second or so
-                    $.when(moveSpyRight({
-                        x: end_x,
-                        end_x: x,
-                        y: y
+                    $.when(showQuestionmark({
+                        x: offset_left+(doors.right.sprite.x*zoom)/2-20,
+                        y: top+(doors.left.sprite.y*zoom)-50
                     }))
                     .then(function() {
-                        d.resolve();
+                        $.when(moveSpyRight({
+                            x: end_x,
+                            end_x: x,
+                            y: y
+                        }))
+                        .then(function() {
+                            d.resolve();
+                        });
                     });
                 });
                 break;
@@ -865,6 +883,19 @@
         }, sprites.spy.wait);
 
         return d;
+    }
+
+    function spyFaceFront(opts) {
+        // show spy image facing the front and show animated questionmark
+        ctx.clearRect(0, 0, w, h);
+        ctx.putImageData(base_img, 0, 0);
+        ctx.drawImage(
+            sprites.spy.walk_fw.object,
+            0, 0,
+            sprites.spy.walk_fw.s_w, sprites.spy.walk_fw.s_h,
+            opts.x, opts.y,
+            sprites.spy.walk_fw.s_w, sprites.spy.walk_fw.s_h
+        );
     }
 
     /*
@@ -1161,5 +1192,69 @@
     /*
         Questionmark sprites
      */
+    function showQuestionmark(opts) {
+        var
+            tot = 0,
+            d = new $.Deferred(),
+            timer = new FrameTimer(),
+            spritesheet = new SpriteSheet({
+                width: sprites.qm.qm.s_w,
+                height: sprites.qm.qm.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 },
+                    { name: 'fr_3', x: 0, y: 0 },
+                    { name: 'fr_4', x: 0, y: 0 },
+                    { name: 'fr_5', x: 0, y: 0 },
+                    { name: 'fr_6', x: 0, y: 0 },
+                    { name: 'fr_7', x: 0, y: 0 },
+                    { name: 'fr_8', x: 0, y: 0 },
+                    { name: 'fr_9', x: 0, y: 0 },
+                    { name: 'fr_10', x: 0, y: 0 },
+                    { name: 'fr_11', x: 0, y: 0 },
+                    { name: 'fr_12', x: 0, y: 0 }
+                ]
+            }),
+            animation = new Animation([
+                    { sprite: 'fr_1', time: sprites.qm.time },
+                    { sprite: 'fr_2', time: sprites.qm.time },
+                    { sprite: 'fr_3', time: sprites.qm.time },
+                    { sprite: 'fr_4', time: sprites.qm.time },
+                    { sprite: 'fr_5', time: sprites.qm.time },
+                    { sprite: 'fr_6', time: sprites.qm.time },
+                    { sprite: 'fr_7', time: sprites.qm.time },
+                    { sprite: 'fr_8', time: sprites.qm.time },
+                    { sprite: 'fr_9', time: sprites.qm.time },
+                    { sprite: 'fr_10', time: sprites.qm.time },
+                    { sprite: 'fr_11', time: sprites.qm.time },
+                    { sprite: 'fr_12', time: sprites.qm.time }
+            ], spritesheet)
+        ;
+
+        var t = setInterval(function() {
+            tot += sprites.qm.wait;
+            if (tot>=sprites.qm.length) {
+                clearTimeout(t);
+                d.resolve();
+                return;
+            }
+
+            animation.animate(timer.getSeconds());
+            var frame = animation.getSprite();
+            ctx.clearRect(0, 0, w, h);
+            ctx.putImageData(base_img, 0, 0);
+            ctx.drawImage(
+                sprites.qm.qm.object,
+                frame.x, frame.y,
+                sprites.qm.qm.s_w, sprites.qm.qm.s_h,
+                opts.x, opts.y,
+                sprites.qm.qm.s_w, sprites.qm.qm.s_h
+            );
+
+            timer.tick();
+        }, sprites.qm.wait);
+
+        return d;
+    }
 
 })(jQuery);
