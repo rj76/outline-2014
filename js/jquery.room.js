@@ -114,14 +114,10 @@
                 speed: 1,
                 time: 0.2,
                 wait: 5,
-                length: 1000,
+                length: 3000,
                 num_images: 0,
                 num_objects: 0,
-                qm_r: {
-                    s_w: 50, s_h: 50,
-                    img: 'img/sprites/question-mk-50px.png'
-                },
-                qm_l: {
+                qm: {
                     s_w: 50, s_h: 50,
                     img: 'img/sprites/question-mk-50px.png'
                 }
@@ -162,6 +158,7 @@
         ],
         wallpaper_objects = [],
         room_configs = ['l', 'lb', 'lr', 'rl', 'rb', 'r'],// door: left and back (lb), left and right (lr), right and back (rb), etc.
+        choosable = ['lb', 'lr', 'rl', 'rb'],
         active_config,
         visuals=[], intro_steps=[],
         current_visual =0, current_intro_step= 0,
@@ -197,12 +194,14 @@
 
                     $canvas.on('switch_visual', function() {
                         visuals[current_visual].stop();
-                        current_visual++;
-                        if (current_visual == visuals.length-1) current_visual = 0;
+                        current_visual = randomIntFromInterval(0, visuals.length-1);
+                        console.log('current_visual: '+current_visual);
                         doNextVisual();
                     });
 
                     $canvas.on('start_visuals', function() {
+                        current_visual = randomIntFromInterval(0, visuals.length-1);
+                        console.log('current_visual: '+current_visual);
                         doNextVisual();
                     });
                 }
@@ -243,7 +242,7 @@
         // 2) cat from right to center-something, face front, show question mark, walk out
         // deze duurt 5.75 @ 28,95
         console.log('intro step 2');
-        active_config = 'r';
+        active_config = 'l';
         createRoom();
         createDoors();
         createPaintings();
@@ -354,7 +353,7 @@
      */
     function doNextVisual() {
         // create room config
-        active_config = room_configs[randomIntFromInterval(0, room_configs.length-1)];
+        active_config = choosable[randomIntFromInterval(0, choosable.length-1)];
 
         createRoom();
         createDoors();
@@ -646,8 +645,7 @@
                         .then(function() {
                             d.resolve();
                         });
-
-                        })
+                    });
                 });
                 break;
             case 'r':
@@ -930,13 +928,19 @@
                 }))
                 .then(function() {
                     // insert question mark sprite for 1 second or so
-                    $.when(moveCatLeft({
-                        x: end_x,
-                        end_x: x,
-                        y: y
+                    $.when(showQuestionmark({
+                        x: offset_left+(doors.right.sprite.x*zoom)/2-20,
+                        y: top+(doors.left.sprite.y*zoom)-50
                     }))
                     .then(function() {
-                        d.resolve();
+                        $.when(moveCatLeft({
+                            x: end_x,
+                            end_x: x,
+                            y: y
+                        }))
+                        .then(function() {
+                            d.resolve();
+                        });
                     });
                 });
                 break;
@@ -1241,8 +1245,8 @@
 
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
-            ctx.clearRect(0, 0, w, h);
-            ctx.putImageData(base_img, 0, 0);
+//            ctx.clearRect(0, 0, w, h);
+//            ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.qm.qm.object,
                 frame.x, frame.y,

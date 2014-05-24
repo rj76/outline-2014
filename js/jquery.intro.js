@@ -119,7 +119,6 @@
             img.onload = function() {
                 ctx_hidden.drawImage(img, 0, 0, 1000, 750);
                 d = ctx_hidden.getImageData(0, 0, w, h);
-                console.log('window.effects.regionAlphaToMaxCenter');
                 $.when(window.effects.regionAlphaToMaxCenterX({
                     ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
                 }))

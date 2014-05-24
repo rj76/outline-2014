@@ -40,7 +40,7 @@
             lineNumber++;
     		colorArray = setColorList(iterations);
             create();
-             requestAnimationFrame(animate, opts.canvas);
+            requestAnimationFrame(animate, opts.canvas);
         }
     }
 
