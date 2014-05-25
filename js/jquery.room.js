@@ -84,7 +84,7 @@
             num_images: 0,
             num_objects: 0,
             spy: {
-                speed: 1,
+                speed: 2,
                 time: 0.2,
                 wait: 5,
                 num_images: 0,
@@ -123,7 +123,7 @@
                 }
             },
             cat: {
-                speed: 1,
+                speed: 2,
                 time: 0.2,
                 wait: 5,
                 num_images: 0,
@@ -156,6 +156,14 @@
             'img/wall/ghunter.jpg',
             'img/wall/alpacafluffy.jpg'
         ],
+        props = {
+            num_objects: 0,
+            num_images: 0,
+            heart: {
+                ratio: .1,
+                img: 'img/heart.png'
+            }
+        },
         wallpaper_objects = [],
         room_configs = ['l', 'lb', 'lr', 'rl', 'rb', 'r'],// door: left and back (lb), left and right (lr), right and back (rb), etc.
         choosable = ['lb', 'lr', 'rl', 'rb'],
@@ -168,7 +176,8 @@
     $.room = function() {};
     $.room.prototype.init = function () {
         // load images
-        $.when(loadWallpapers(), loadSprites()).then(function() {
+        $.when(loadProps(), loadWallpapers(), loadSprites()).then(function() {
+            console.log('images loaded');
             Modernizr.load({
                 load: [
                     'js/sprite/Animation.js',
@@ -323,6 +332,7 @@
         // deze duurt 5.75 + 2.875 @ 43,325
         console.log('intro step 5');
         active_config = 'spy-l-cat-r';
+        var spy_cat_img;
 
         createRoom();
         createDoors();
@@ -336,14 +346,50 @@
             ctx: ctx, ctx_org: ctx_hidden, el: canvas, x: 0, y: 0, w: w, h: h
         }))
         .then(function() {
-            // move sprite through room
-            $.when(moveSpy(), moveCat()).then(function() {
-                active_config = 'spy-cat-left';
-                $.when(moveSpy(), moveCat()).then(function() {
-                    window.effects.regionAlphaToMinCenterY({
-                        ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
-                    });
-                });
+            // move spy from left to center and cat from right to center
+            $.when(moveSpyRightCatLeftCenter({
+                spy_x: doors.left.sprite.x*zoom+offset_left,
+                spy_y: top+doors.left.sprite.y*zoom,
+                cat_x: doors.left.sprite.x*zoom+offset_left,
+                cat_y: top+doors.left.sprite.y*zoom,
+                spy_end_x: offset_left+(doors.left.sprite.x*zoom)/2+20,
+                cat_end_x: offset_left+(doors.left.sprite.x*zoom)/2+20
+            }))
+            .then(function() {
+                // store cat and spy image to restore after heart
+                spy_cat_img = ctx.getImageData(0, 0, w, h);
+
+                // display heart in the center
+                setTimeout(function() {
+                    ctx.drawImage(
+                        props.heart.object,
+                        offset_left+(doors.right.sprite.x*zoom)/2,
+                        doors.left.sprite.y*zoom,
+                        props.heart.object.width*props.heart.ratio,
+                        props.heart.object.height*props.heart.ratio
+                    );
+                    // Remove heart, wait
+                    setTimeout(function() {
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.putImageData(spy_cat_img, 0, 0);
+
+                        // Move spy right, cat follows
+                        setTimeout(function() {
+                            $.when(moveSpyCatLeft({
+                                spy_x: offset_left+(doors.left.sprite.x*zoom)/2-20,
+                                spy_y: top+doors.left.sprite.y*zoom,
+                                cat_x: offset_left+(doors.left.sprite.x*zoom)/2+20,
+                                cat_y: top+doors.left.sprite.y*zoom,
+                                end_x: offset_left+doors.left.sprite.x*zoom
+                            }))
+                            .then(function() {
+                                window.effects.regionAlphaToMinCenterY({
+                                    ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
+                                });
+                            });
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
             });
         });
     });
@@ -398,6 +444,28 @@
             };
             img.src = wallpapers[i];
             wallpaper_objects.push(img);
+        }
+        return d;
+    }
+
+    function loadProps() {
+        var d = new $.Deferred(), a = [], prop;
+        for (prop in props) {
+            if (typeof props[prop].img != 'undefined') {
+                a.push(props[prop].img);
+            }
+        }
+        props.num_images = a.length;
+
+        for (prop in props) {
+            if (typeof props[prop].img == 'undefined') continue;
+            var img = new Image();
+            img.onload = function() {
+                props.num_objects++;
+                if (props.num_objects==props.num_images) d.resolve();
+            };
+            img.src = props[prop].img;
+            props[prop].object = img;
         }
         return d;
     }
@@ -769,14 +837,7 @@
             ], spritesheet)
         ;
 
-        var t = setInterval(function() {
-            opts.x += sprites.spy.speed;
-            if (opts.x>=opts.end_x) {
-                clearTimeout(t);
-                d.resolve();
-                return;
-            }
-
+        function animate() {
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
             ctx.clearRect(0, 0, w, h);
@@ -790,7 +851,16 @@
             );
 
             timer.tick();
-        }, sprites.spy.wait);
+
+            opts.x += sprites.spy.speed;
+            if (opts.x>=opts.end_x) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
 
         return d;
     }
@@ -813,14 +883,7 @@
             ], spritesheet)
         ;
 
-        var t = setInterval(function() {
-            opts.y -= sprites.spy.speed;
-            if (opts.y<=opts.end_y) {
-                clearTimeout(t);
-                d.resolve();
-                return;
-            }
-
+        function animate() {
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
             ctx.clearRect(0, 0, w, h);
@@ -834,7 +897,16 @@
             );
 
             timer.tick();
-        }, sprites.spy.wait);
+
+            opts.y -= sprites.spy.speed;
+            if (opts.y<=opts.end_y) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
 
         return d;
     }
@@ -857,14 +929,7 @@
             ], spritesheet)
         ;
 
-        var t = setInterval(function() {
-            opts.x -= sprites.spy.speed;
-            if (opts.x<=opts.end_x) {
-                clearTimeout(t);
-                d.resolve();
-                return;
-            }
-
+        function animate() {
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
             ctx.clearRect(0, 0, w, h);
@@ -878,7 +943,16 @@
             );
 
             timer.tick();
-        }, sprites.spy.wait);
+
+            opts.x -= sprites.spy.speed;
+            if (opts.x<=opts.end_x) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
 
         return d;
     }
@@ -1075,14 +1149,7 @@
             ], spritesheet)
         ;
 
-        var t = setInterval(function() {
-            opts.x += sprites.cat.speed;
-            if (opts.x>=opts.end_x) {
-                clearTimeout(t);
-                d.resolve();
-                return;
-            }
-
+        function animate() {
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
             ctx.clearRect(0, 0, w, h);
@@ -1096,7 +1163,16 @@
             );
 
             timer.tick();
-        }, sprites.cat.wait);
+
+            opts.x += sprites.cat.speed;
+            if (opts.x>=opts.end_x) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
 
         return d;
     }
@@ -1121,14 +1197,7 @@
             ], spritesheet)
         ;
 
-        var t = setInterval(function() {
-            opts.y -= sprites.cat.speed;
-            if (opts.y<=opts.end_y) {
-                clearTimeout(t);
-                d.resolve();
-                return;
-            }
-
+        function animate() {
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
             ctx.clearRect(0, 0, w, h);
@@ -1142,7 +1211,16 @@
             );
 
             timer.tick();
-        }, sprites.cat.wait);
+
+            opts.y -= sprites.cat.speed;
+            if (opts.y<=opts.end_y) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
 
         return d;
     }
@@ -1167,14 +1245,7 @@
             ], spritesheet)
         ;
 
-        var t = setInterval(function() {
-            opts.x -= sprites.cat.speed;
-            if (opts.x<=opts.end_x) {
-                clearTimeout(t);
-                d.resolve();
-                return;
-            }
-
+        function animate() {
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
             ctx.clearRect(0, 0, w, h);
@@ -1188,7 +1259,158 @@
             );
 
             timer.tick();
-        }, sprites.cat.wait);
+
+            opts.x -= sprites.cat.speed;
+            if (opts.x<=opts.end_x) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
+
+        return d;
+    }
+
+    /*
+        Combined spy/cat sprites
+     */
+    function moveSpyRightCatLeftCenter(opts) {
+        var
+            d = new $.Deferred(),
+            timer = new FrameTimer(),
+            spy_spritesheet = new SpriteSheet({
+                width: sprites.spy.walk_right.s_w,
+                height: sprites.spy.walk_right.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 }
+                ]
+            }),
+            spy_animation = new Animation([
+                    { sprite: 'fr_1', time: sprites.spy.time },
+                    { sprite: 'fr_2', time: sprites.spy.time }
+            ], spy_spritesheet),
+            cat_spritesheet = new SpriteSheet({
+                width: sprites.cat.walk_left.s_w,
+                height: sprites.cat.walk_left.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 },
+                    { name: 'fr_3', x: 0, y: 0 }
+                ]
+            }),
+            cat_animation = new Animation([
+                    { sprite: 'fr_1', time: sprites.cat.time },
+                    { sprite: 'fr_2', time: sprites.cat.time },
+                    { sprite: 'fr_3', time: sprites.cat.time }
+            ], cat_spritesheet)
+        ;
+
+        function animate() {
+            spy_animation.animate(timer.getSeconds());
+            cat_animation.animate(timer.getSeconds());
+            var spy_frame = spy_animation.getSprite(), cat_frame = cat_animation.getSprite();
+            ctx.clearRect(0, 0, w, h);
+            ctx.putImageData(base_img, 0, 0);
+            ctx.drawImage(
+                sprites.spy.walk_right.object,
+                spy_frame.x, spy_frame.y,
+                sprites.spy.walk_right.s_w, sprites.spy.walk_right.s_h,
+                opts.spy_x, opts.spy_y,
+                sprites.spy.walk_right.s_w, sprites.spy.walk_right.s_h
+            );
+            ctx.drawImage(
+                sprites.cat.walk_left.object,
+                cat_frame.x, cat_frame.y,
+                sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h,
+                opts.cat_x, opts.cat_y,
+                sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h
+            );
+
+            timer.tick();
+
+            opts.spy_x += sprites.spy.speed;
+            opts.cat_x -= sprites.cat.speed;
+            if (opts.spy_x >= opts.spy_end_x && opts.cat_x <= opts.cat_end_x) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
+
+        return d;
+    }
+
+    function moveSpyCatLeft(opts) {
+        var
+            d = new $.Deferred(),
+            timer = new FrameTimer(),
+            spy_spritesheet = new SpriteSheet({
+                width: sprites.spy.walk_left.s_w,
+                height: sprites.spy.walk_left.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 }
+                ]
+            }),
+            spy_animation = new Animation([
+                    { sprite: 'fr_1', time: sprites.spy.time },
+                    { sprite: 'fr_2', time: sprites.spy.time }
+            ], spy_spritesheet),
+            cat_spritesheet = new SpriteSheet({
+                width: sprites.cat.walk_left.s_w,
+                height: sprites.cat.walk_left.s_h,
+                sprites: [
+                    { name: 'fr_1', x: 0, y: 0 },
+                    { name: 'fr_2', x: 0, y: 0 },
+                    { name: 'fr_3', x: 0, y: 0 }
+                ]
+            }),
+            cat_animation = new Animation([
+                    { sprite: 'fr_1', time: sprites.cat.time },
+                    { sprite: 'fr_2', time: sprites.cat.time },
+                    { sprite: 'fr_3', time: sprites.cat.time }
+            ], cat_spritesheet)
+        ;
+
+        function animate() {
+            spy_animation.animate(timer.getSeconds());
+            cat_animation.animate(timer.getSeconds());
+            var spy_frame = spy_animation.getSprite(), cat_frame = cat_animation.getSprite();
+            ctx.clearRect(0, 0, w, h);
+            ctx.putImageData(base_img, 0, 0);
+            ctx.drawImage(
+                sprites.spy.walk_left.object,
+                spy_frame.x, spy_frame.y,
+                sprites.spy.walk_left.s_w, sprites.spy.walk_left.s_h,
+                opts.spy_x, opts.spy_y,
+                sprites.spy.walk_left.s_w, sprites.spy.walk_left.s_h
+            );
+            ctx.drawImage(
+                sprites.cat.walk_left.object,
+                cat_frame.x, cat_frame.y,
+                sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h,
+                opts.cat_x, opts.cat_y,
+                sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h
+            );
+
+            timer.tick();
+
+            // cat is moving behind spy, so resolve when cat_x hits end_x
+            if (opts.spy_x > opts.end_x) opts.spy_x -= sprites.spy.speed;
+            opts.cat_x -= sprites.cat.speed;
+            if (opts.cat_x <= opts.end_x) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
 
         return d;
     }
@@ -1235,18 +1457,9 @@
             ], spritesheet)
         ;
 
-        var t = setInterval(function() {
-            tot += sprites.qm.wait;
-            if (tot>=sprites.qm.length) {
-                clearTimeout(t);
-                d.resolve();
-                return;
-            }
-
+        function animate() {
             animation.animate(timer.getSeconds());
             var frame = animation.getSprite();
-//            ctx.clearRect(0, 0, w, h);
-//            ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.qm.qm.object,
                 frame.x, frame.y,
@@ -1256,7 +1469,16 @@
             );
 
             timer.tick();
-        }, sprites.qm.wait);
+
+            tot += sprites.qm.wait;
+            if (tot>=sprites.qm.length) {
+                d.resolve();
+            } else {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        setTimeout(animate, 100);
 
         return d;
     }
