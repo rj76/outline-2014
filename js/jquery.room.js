@@ -84,9 +84,8 @@
             num_images: 0,
             num_objects: 0,
             spy: {
-                speed: 2,
+                speed: 4,
                 time: 0.2,
-                wait: 5,
                 num_images: 0,
                 num_objects: 0,
                 punch_right: {
@@ -113,8 +112,8 @@
             qm: {
                 speed: 1,
                 time: 0.2,
-                wait: 5,
-                length: 3000,
+                wait: 10,
+                length: 1000,
                 num_images: 0,
                 num_objects: 0,
                 qm: {
@@ -123,9 +122,8 @@
                 }
             },
             cat: {
-                speed: 2,
+                speed: 4,
                 time: 0.2,
-                wait: 5,
                 num_images: 0,
                 num_objects: 0,
                 walk_left: {
@@ -350,10 +348,10 @@
             $.when(moveSpyRightCatLeftCenter({
                 spy_x: doors.left.sprite.x*zoom+offset_left,
                 spy_y: top+doors.left.sprite.y*zoom,
-                cat_x: doors.left.sprite.x*zoom+offset_left,
+                cat_x: doors.right.sprite.x*zoom+offset_left,
                 cat_y: top+doors.left.sprite.y*zoom,
-                spy_end_x: offset_left+(doors.left.sprite.x*zoom)/2+20,
-                cat_end_x: offset_left+(doors.left.sprite.x*zoom)/2+20
+                spy_end_x: offset_left+(doors.right.sprite.x*zoom)/2-40,
+                cat_end_x: offset_left+(doors.right.sprite.x*zoom)/2+40
             }))
             .then(function() {
                 // store cat and spy image to restore after heart
@@ -363,7 +361,7 @@
                 setTimeout(function() {
                     ctx.drawImage(
                         props.heart.object,
-                        offset_left+(doors.right.sprite.x*zoom)/2,
+                        offset_left+(doors.right.sprite.x*zoom)/2+20,
                         doors.left.sprite.y*zoom,
                         props.heart.object.width*props.heart.ratio,
                         props.heart.object.height*props.heart.ratio
@@ -376,9 +374,9 @@
                         // Move spy right, cat follows
                         setTimeout(function() {
                             $.when(moveSpyCatLeft({
-                                spy_x: offset_left+(doors.left.sprite.x*zoom)/2-20,
+                                spy_x: offset_left+(doors.right.sprite.x*zoom)/2-40,
                                 spy_y: top+doors.left.sprite.y*zoom,
-                                cat_x: offset_left+(doors.left.sprite.x*zoom)/2+20,
+                                cat_x: offset_left+(doors.right.sprite.x*zoom)/2+40,
                                 cat_y: top+doors.left.sprite.y*zoom,
                                 end_x: offset_left+doors.left.sprite.x*zoom
                             }))
@@ -860,7 +858,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -906,7 +904,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -952,7 +950,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -1004,7 +1002,7 @@
                     // insert question mark sprite for 1 second or so
                     $.when(showQuestionmark({
                         x: offset_left+(doors.right.sprite.x*zoom)/2-20,
-                        y: top+(doors.left.sprite.y*zoom)-50
+                        y: top+(doors.left.sprite.y*zoom)-40
                     }))
                     .then(function() {
                         $.when(moveCatLeft({
@@ -1172,7 +1170,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -1220,7 +1218,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -1268,7 +1266,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -1308,6 +1306,8 @@
             ], cat_spritesheet)
         ;
 
+        console.log('end spy_x: '+opts.spy_end_x+', end cat_x: '+opts.cat_end_x);
+
         function animate() {
             spy_animation.animate(timer.getSeconds());
             cat_animation.animate(timer.getSeconds());
@@ -1340,7 +1340,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -1410,7 +1410,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }
@@ -1478,7 +1478,7 @@
             }
         }
 
-        setTimeout(animate, 100);
+        setTimeout(animate, 10);
 
         return d;
     }

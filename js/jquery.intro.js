@@ -13,13 +13,13 @@
         d,
         a=255,
         texts = [
-            "G'day fellow outliners",
+            "G'day fellow outliners!",
             "This small demo",
-            "is a tribute to the one game we all love",
-            "or comics...",
-            "or television..."
+            "is a tribute to the game I used to love.",
+            "html5 canvas fun",
+            "or so it should be..."
         ],
-        wait=22/texts.length,
+        wait=18/texts.length,
         txt_idx= 0,
         alpha
     ;
