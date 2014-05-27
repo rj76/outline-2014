@@ -96,7 +96,7 @@
 
                     if (dancer.isLoaded()) {
                         dancer.play();
-//                        dancer.setVolume(0);
+                        dancer.setVolume(0);
                         deferred.resolve();
                     } else {
                     }

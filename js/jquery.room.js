@@ -181,15 +181,11 @@
                     'js/sprite/Animation.js',
                     'js/sprite/FrameTimer.js',
                     'js/sprite/SpriteSheet.js',
-                    'js/visuals/jquery.fractal_concentric.js',
-                    'js/visuals/jquery.plasma.js',
-                    'js/visuals/jquery.hgraph.js',
-                    'js/visuals/jquery.morphin_fractal_curves.js'
                 ],
                 complete: function() {
                     visuals.push(new $.fractal_curves);
-                    visuals.push(new $.fractal_concentric);
-                    visuals.push(new $.plasma);
+                    visuals.push(new $.fractal_concentric());
+                    visuals.push(new $.plasma());
                     visuals.push(new $.hgraph);
 
                     $canvas.on('room_intro_plusplus', function() {
@@ -214,6 +210,11 @@
                 }
             });
         });
+    };
+
+    $.room.prototype.do_visual = function(idx) {
+        current_visual = idx;
+        doNextVisual();
     };
 
     /*
@@ -398,6 +399,8 @@
     function doNextVisual() {
         // create room config
         active_config = choosable[randomIntFromInterval(0, choosable.length-1)];
+
+        ctx.clearRect(0, 0, w, h);
 
         createRoom();
         createDoors();
@@ -842,9 +845,9 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.spy.walk_right.object,
-                frame.x, frame.y,
+                frame.x|0, frame.y|0,
                 sprites.spy.walk_right.s_w, sprites.spy.walk_right.s_h,
-                opts.x, opts.y,
+                opts.x|0, opts.y|0,
                 sprites.spy.walk_right.s_w, sprites.spy.walk_right.s_h
             );
 
@@ -888,9 +891,9 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.spy.walk_bw.object,
-                frame.x, frame.y,
+                frame.x|0, frame.y|0,
                 sprites.spy.walk_bw.s_w, sprites.spy.walk_bw.s_h,
-                opts.x, opts.y,
+                opts.x|0, opts.y|0,
                 sprites.spy.walk_bw.s_w, sprites.spy.walk_bw.s_h
             );
 
@@ -934,9 +937,9 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.spy.walk_left.object,
-                frame.x, frame.y,
+                frame.x|0, frame.y|0,
                 sprites.spy.walk_left.s_w, sprites.spy.walk_left.s_h,
-                opts.x, opts.y,
+                opts.x|0, opts.y|0,
                 sprites.spy.walk_left.s_w, sprites.spy.walk_left.s_h
             );
 
@@ -963,7 +966,7 @@
             sprites.spy.walk_fw.object,
             0, 0,
             sprites.spy.walk_fw.s_w, sprites.spy.walk_fw.s_h,
-            opts.x, opts.y,
+            opts.x|0, opts.y|0,
             sprites.spy.walk_fw.s_w, sprites.spy.walk_fw.s_h
         );
     }
@@ -1154,9 +1157,9 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.cat.walk_right.object,
-                frame.x, frame.y,
+                frame.x|0, frame.y|0,
                 sprites.cat.walk_right.s_w, sprites.cat.walk_right.s_h,
-                opts.x, opts.y,
+                opts.x|0, opts.y|0,
                 sprites.cat.walk_right.s_w, sprites.cat.walk_right.s_h
             );
 
@@ -1202,9 +1205,9 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.cat.walk_bw.object,
-                frame.x, frame.y,
+                frame.x|0, frame.y|0,
                 sprites.cat.walk_bw.s_w, sprites.cat.walk_bw.s_h,
-                opts.x, opts.y,
+                opts.x|0, opts.y|0,
                 sprites.cat.walk_bw.s_w, sprites.cat.walk_bw.s_h
             );
 
@@ -1250,9 +1253,9 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.cat.walk_left.object,
-                frame.x, frame.y,
+                frame.x|0, frame.y|0,
                 sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h,
-                opts.x, opts.y,
+                opts.x|0, opts.y|0,
                 sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h
             );
 
@@ -1316,16 +1319,16 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.spy.walk_right.object,
-                spy_frame.x, spy_frame.y,
+                spy_frame.x|0, spy_frame.y|0,
                 sprites.spy.walk_right.s_w, sprites.spy.walk_right.s_h,
-                opts.spy_x, opts.spy_y,
+                opts.spy_x|0, opts.spy_y|0,
                 sprites.spy.walk_right.s_w, sprites.spy.walk_right.s_h
             );
             ctx.drawImage(
                 sprites.cat.walk_left.object,
-                cat_frame.x, cat_frame.y,
+                cat_frame.x|0, cat_frame.y|0,
                 sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h,
-                opts.cat_x, opts.cat_y,
+                opts.cat_x|0, opts.cat_y|0,
                 sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h
             );
 
@@ -1385,16 +1388,16 @@
             ctx.putImageData(base_img, 0, 0);
             ctx.drawImage(
                 sprites.spy.walk_left.object,
-                spy_frame.x, spy_frame.y,
+                spy_frame.x|0, spy_frame.y|0,
                 sprites.spy.walk_left.s_w, sprites.spy.walk_left.s_h,
-                opts.spy_x, opts.spy_y,
+                opts.spy_x|0, opts.spy_y|0,
                 sprites.spy.walk_left.s_w, sprites.spy.walk_left.s_h
             );
             ctx.drawImage(
                 sprites.cat.walk_left.object,
-                cat_frame.x, cat_frame.y,
+                cat_frame.x|0, cat_frame.y|0,
                 sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h,
-                opts.cat_x, opts.cat_y,
+                opts.cat_x|0, opts.cat_y|0,
                 sprites.cat.walk_left.s_w, sprites.cat.walk_left.s_h
             );
 
@@ -1462,9 +1465,9 @@
             var frame = animation.getSprite();
             ctx.drawImage(
                 sprites.qm.qm.object,
-                frame.x, frame.y,
+                frame.x|0, frame.y|0,
                 sprites.qm.qm.s_w, sprites.qm.qm.s_h,
-                opts.x, opts.y,
+                opts.x|0, opts.y|0,
                 sprites.qm.qm.s_w, sprites.qm.qm.s_h
             );
 

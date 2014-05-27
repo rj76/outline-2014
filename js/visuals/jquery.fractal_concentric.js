@@ -17,7 +17,7 @@
     function animate() {
         if (do_loop) {
             generate();
-             requestAnimationFrame(animate, opts.canvas);
+            requestAnimationFrame(animate, opts.canvas);
         }
     }
 
@@ -98,8 +98,9 @@
 
 
 		for (var i = 0; i < numCircles; i++) {
-			maxRad = 20 + (i+1)/numCircles*220;
-                minRad = 20 + (0.85+0.15*(window.Dancer.getFrequency(10,50)*100)*i)/numCircles*220;
+            var f = typeof window.Dancer == 'undefined' ? 1 : window.Dancer.getFrequency(10,50)*100;
+            maxRad = 140 + (i+1*f)/numCircles*220;
+            minRad = 50 + (0.85+0.15*f*i)/numCircles*220;
 
 			r = Math.floor(Math.random()*255);
 			g = Math.floor(Math.random()*255);

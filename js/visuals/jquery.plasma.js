@@ -19,7 +19,9 @@
         opts
     ;
 
-    $.plasma = function () {};
+    $.plasma = function () {
+
+    };
     $.plasma.prototype.start = function (_opts) {
         opts = _opts;
         g_canvas = opts.canvas;
@@ -134,7 +136,7 @@
                 palette = this.palettes[this.PaletteIndex],
                 paletteoffset = this.paletteoffset += this.CycleSpeed,
                 plasmafun = this.PlasmaFunction,
-                uhuh=window.Dancer.getFrequency(0,50)*100
+                uhuh=typeof window.Dancer == 'undefined' ? 1 : window.Dancer.getFrequency(0,50)*100
                 ;
             // scale the plasma source to the canvas width/height
             var vpx = (w / pw)+uhuh, vpy = (h / ph)+uhuh;

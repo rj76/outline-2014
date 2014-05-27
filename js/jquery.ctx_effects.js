@@ -60,10 +60,10 @@
                 for(var _y=current_y;_y<=current_y+y_factor;_y++) {
                     var
                         a = 0, // a = ((_x/current_x)*255)-255
-                        idx_x=4*(_x + _y*opts.w),
-                        idx_x_b=4*((opts.w-_x) + _y*opts.w);
-                        d.data[idx_x+3] = a;
-                        d.data[idx_x_b+3] = a;
+                        idx_x=(4*(_x + _y*opts.w))|0,
+                        idx_x_b=(4*((opts.w-_x) + _y*opts.w))|0;
+                        d.data[idx_x+3] = a|0;
+                        d.data[idx_x_b+3] = a|0;
                 }
             }
         }
@@ -99,10 +99,10 @@
                 for(var _x=current_x;_x<=current_x+x_factor;_x++) {
                     var
                         a = 0, // a = ((_x/current_x)*255)-255
-                        idx_x=4*(_x + _y*opts.w),
-                        idx_x_b=4*(_x + (opts.h-_y)*opts.w);
-                        d.data[idx_x+3] = a;
-                        d.data[idx_x_b+3] = a;
+                        idx_x=(4*(_x + _y*opts.w))|0,
+                        idx_x_b=(4*(_x + (opts.h-_y)*opts.w))|0;
+                        d.data[idx_x+3] = a|0;
+                        d.data[idx_x_b+3] = a|0;
                 }
             }
         }
@@ -140,8 +140,8 @@
             for(var current_y=0;current_y<=opts.h;current_y+=y_factor) {
                 for(var _y=current_y;_y<=current_y+y_factor;_y++) {
                     var
-                        idx_x=4*(_x + _y*opts.w),
-                        idx_x_b=4*((opts.w-_x) + _y*opts.w);
+                        idx_x=(4*(_x + _y*opts.w))|0,
+                        idx_x_b=(4*((opts.w-_x) + _y*opts.w))|0;
 
                     d.data[idx_x] = d_org.data[idx_x];
                     d.data[idx_x_b] = d_org.data[idx_x_b];
@@ -191,8 +191,8 @@
                 current_x = Math.ceil(current_x);
                 for(var _x=current_x;_x<current_x+x_factor;_x++) {
                     var
-                        idx_x=4*(_x + _y*opts.w),
-                        idx_x_b=4*(_x + (opts.h-_y)*opts.w);
+                        idx_x=(4*(_x + _y*opts.w))|0,
+                        idx_x_b=(4*(_x + (opts.h-_y)*opts.w))|0;
 
                     d.data[idx_x] = d_org.data[idx_x];
                     d.data[idx_x_b] = d_org.data[idx_x_b];
