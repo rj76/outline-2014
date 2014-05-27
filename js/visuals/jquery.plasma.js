@@ -92,9 +92,9 @@
 
         palette = [];
         for (var i = 0, r, g, b; i < 256; i++) {
-            r = ~~(Sin(0.3 * i) * 64 + 190),
-                g = ~~(Sin(0.3 * i + 2) * 64 + 190),
-                b = ~~(Sin(0.3 * i + 4) * 64 + 190);
+            r = ~~(Sin(0.3 * i * window.Dancer.getFrequency(0,10)) * 64 + 190),
+                g = ~~(Sin(0.3 * i * window.Dancer.getFrequency(10,20)+ 2) * 64 + 190),
+                b = ~~(Sin(0.3 * i * window.Dancer.getFrequency(20,60) + 4) * 64 + 190);
             palette.push(rgb(r, g, b));
         }
         this.palettes.push(palette);

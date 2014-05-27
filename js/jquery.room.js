@@ -84,7 +84,8 @@
             num_images: 0,
             num_objects: 0,
             spy: {
-                speed: 3,
+                speed: 2,
+                speed_fast: 5,
                 time: 0.2,
                 num_images: 0,
                 num_objects: 0,
@@ -122,7 +123,8 @@
                 }
             },
             cat: {
-                speed: 3,
+                speed: 2,
+                speed_fast: 5,
                 time: 0.2,
                 num_images: 0,
                 num_objects: 0,
@@ -681,17 +683,19 @@
         Spy sprite movements
      */
     function moveSpy() {
-        var x, y, end_x, end_y, d = new $.Deferred();
+        var x, y, end_x, end_y, speed, d = new $.Deferred();
         switch(active_config) {
             case 'spy-l-cat-r':
                 // move from left door to center and back
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
-                end_x = offset_left+(doors.right.sprite.x*zoom)/2-40;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2-44;
+                speed = sprites.spy.speed;
                 $.when(moveSpyRight({
                     x: x,
                     end_x: end_x,
-                    y: y
+                    y: y,
+                    speed: speed
                 }))
                 .then(function() {
                     d.resolve();
@@ -701,23 +705,26 @@
                 // move from left door to center and back
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
-                end_x = offset_left+(doors.right.sprite.x*zoom)/2-40;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2-20;
+                speed = sprites.spy.speed;
                 $.when(moveSpyRight({
                     x: x,
                     end_x: end_x,
-                    y: y
+                    y: y,
+                    speed: speed
                 }))
                 .then(function() {
                     // insert question mark sprite for 1 second or so
                     $.when(showQuestionmark({
-                        x: offset_left+(doors.right.sprite.x*zoom)/2-20,
+                        x: offset_left+(doors.right.sprite.x*zoom)/2-30,
                         y: top+(doors.left.sprite.y*zoom)-50
                     }))
                     .then(function() {
                         $.when(moveSpyLeft({
                             x: end_x,
                             end_x: x,
-                            y: y
+                            y: y,
+                            speed: speed
                         }))
                         .then(function() {
                             d.resolve();
@@ -730,10 +737,12 @@
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+(doors.left.sprite.x*zoom)/2+40;
+                speed = sprites.spy.speed;
                 $.when(moveSpyLeft({
                     x: x,
                     end_x: end_x,
-                    y: y
+                    y: y,
+                    speed: speed
                 }))
                 .then(function() {
                     // insert question mark sprite for 1 second or so
@@ -745,7 +754,8 @@
                         $.when(moveSpyRight({
                             x: end_x,
                             end_x: x,
-                            y: y
+                            y: y,
+                            speed: speed
                         }))
                         .then(function() {
                             d.resolve();
@@ -758,10 +768,12 @@
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.right.sprite.x*zoom;
+                speed = sprites.spy.speed_fast;
                 $.when(moveSpyRight({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     })).then(function() {
                         d.resolve();
                 });
@@ -771,10 +783,12 @@
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+doors.left.sprite.x*zoom;
+                speed = sprites.spy.speed_fast;
                 $.when(moveSpyLeft({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     })).then(function() {
                         d.resolve();
                 });
@@ -785,16 +799,19 @@
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+doors.back_left.sprite.x*zoom;
                 end_y = doors.back_left.sprite.y*zoom;
+                speed = sprites.spy.speed_fast;
                 $.when(moveSpyLeft({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     }))
                     .then(function() {
                         $.when(moveSpyBack({
                             x: end_x,
                             end_y: end_y,
-                            y: y
+                            y: y,
+                            speed: speed
                         }))
                         .then(function() {
                             d.resolve();
@@ -807,16 +824,19 @@
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.back_right.sprite.x*zoom;
                 end_y = doors.back_right.sprite.y*zoom;
+                speed = sprites.spy.speed_fast;
                 $.when(moveSpyRight({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     }))
                     .then(function() {
                         $.when(moveSpyBack({
                             x: end_x,
                             end_y: end_y,
-                            y: y
+                            y: y,
+                            speed: speed
                         }))
                         .then(function() {
                             d.resolve();
@@ -861,7 +881,7 @@
 
             timer.tick();
 
-            opts.x += sprites.spy.speed;
+            opts.x += opts.speed;
             if (opts.x>=opts.end_x) {
                 d.resolve();
             } else {
@@ -907,7 +927,7 @@
 
             timer.tick();
 
-            opts.y -= sprites.spy.speed;
+            opts.y -= opts.speed;
             if (opts.y<=opts.end_y) {
                 d.resolve();
             } else {
@@ -953,7 +973,7 @@
 
             timer.tick();
 
-            opts.x -= sprites.spy.speed;
+            opts.x -= opts.speed;
             if (opts.x<=opts.end_x) {
                 d.resolve();
             } else {
@@ -983,17 +1003,19 @@
         Cat sprite movements
      */
     function moveCat() {
-        var x, y, end_x, end_y, d = new $.Deferred();
+        var x, y, end_x, end_y, speed, d = new $.Deferred();
         switch(active_config) {
             case 'spy-l-cat-r':
                 // move from right door to center
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+(doors.right.sprite.x*zoom)/2+40;
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatLeft({
                     x: x,
                     end_x: end_x,
-                    y: y
+                    y: y,
+                    speed: speed
                 }))
                 .then(function() {
                     d.resolve();
@@ -1003,23 +1025,26 @@
                 // move from left door to center and back
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
-                end_x = offset_left+(doors.right.sprite.x*zoom)/2-40;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2-20;
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatRight({
                     x: x,
                     end_x: end_x,
-                    y: y
+                    y: y,
+                    speed: speed
                 }))
                 .then(function() {
                     // insert question mark sprite for 1 second or so
                     $.when(showQuestionmark({
-                        x: offset_left+(doors.right.sprite.x*zoom)/2-20,
-                        y: top+(doors.left.sprite.y*zoom)-40
+                        x: offset_left+(doors.right.sprite.x*zoom)/2-30,
+                        y: top+(doors.left.sprite.y*zoom)-50
                     }))
                     .then(function() {
                         $.when(moveCatLeft({
                             x: end_x,
                             end_x: x,
-                            y: y
+                            y: y,
+                            speed: speed
                         }))
                         .then(function() {
                             d.resolve();
@@ -1032,17 +1057,20 @@
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+(doors.right.sprite.x*zoom)/2;
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatLeft({
                     x: x,
                     end_x: end_x,
-                    y: y
+                    y: y,
+                    speed: speed
                 }))
                 .then(function() {
                     // insert question mark sprite for 1 second or so
                     $.when(moveCatRight({
                         x: end_x,
                         end_x: x,
-                        y: y
+                        y: y,
+                        speed: speed
                     }))
                     .then(function() {
                         d.resolve();
@@ -1054,10 +1082,12 @@
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.right.sprite.x*zoom;
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatRight({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     })).then(function() {
                         d.resolve();
                 });
@@ -1067,10 +1097,12 @@
                 x = doors.right.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.left.sprite.x*zoom;
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatLeft({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     })).then(function() {
                         d.resolve();
                 });
@@ -1080,10 +1112,12 @@
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+((doors.right.sprite.x*zoom)/2);
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatRight({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     })).then(function() {
                         d.resolve();
                 });
@@ -1095,16 +1129,19 @@
                 y = top+doors.right.sprite.y*zoom;
                 end_x = offset_left+doors.back_left.sprite.x*zoom;
                 end_y = doors.back_left.sprite.y*zoom;
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatLeft({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     }))
                     .then(function() {
                         $.when(moveCatBack({
                             x: end_x,
                             end_y: end_y,
-                            y: y
+                            y: y,
+                            speed: speed
                         }))
                         .then(function() {
                             d.resolve();
@@ -1117,16 +1154,19 @@
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.back_right.sprite.x*zoom;
                 end_y = doors.back_right.sprite.y*zoom;
+                speed = sprites.cat.speed;
                 $.when(moveCatRight({
                         x: x,
                         end_x: end_x,
-                        y: y
+                        y: y,
+                        speed: speed
                     }))
                     .then(function() {
                         $.when(moveCatBack({
                             x: end_x,
                             end_y: end_y,
-                            y: y
+                            y: y,
+                            speed: speed
                         }))
                         .then(function() {
                             d.resolve();
@@ -1173,7 +1213,7 @@
 
             timer.tick();
 
-            opts.x += sprites.cat.speed;
+            opts.x += opts.speed;
             if (opts.x>=opts.end_x) {
                 d.resolve();
             } else {
@@ -1221,7 +1261,7 @@
 
             timer.tick();
 
-            opts.y -= sprites.cat.speed;
+            opts.y -= opts.speed;
             if (opts.y<=opts.end_y) {
                 d.resolve();
             } else {
@@ -1269,7 +1309,7 @@
 
             timer.tick();
 
-            opts.x -= sprites.cat.speed;
+            opts.x -= opts.speed;
             if (opts.x<=opts.end_x) {
                 d.resolve();
             } else {
