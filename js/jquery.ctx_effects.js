@@ -6,9 +6,8 @@
         opts,
         current_x, current_y,
         deferred,
-        x_factor=10, y_factor= 8,
-        counter=0
-        ;
+        x_factor=15, y_factor= 15
+    ;
 
     $.effects.prototype.regionAlphaToMin = function(_opts) {
         /*

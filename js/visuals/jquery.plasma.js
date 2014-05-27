@@ -23,6 +23,7 @@
 
     };
     $.plasma.prototype.start = function (_opts) {
+        do_loop = true;
         opts = _opts;
         g_canvas = opts.canvas;
         WIDTH = g_canvas.width;// = window.innerWidth;

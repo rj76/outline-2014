@@ -64,6 +64,7 @@
                         })
                         .onceAt(46.3+step*8, function() {
                             console.log('end tune2, start tune3/triggering switch')
+                            $('#canv_room').trigger('switch_visual');
                         })
                         .onceAt(46.3+step*10, function() {
                             console.log('triggering switch');

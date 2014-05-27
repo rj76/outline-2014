@@ -7,6 +7,7 @@
     $.fractal_concentric = function() {};
     $.fractal_concentric.prototype.start = function (_opts) {
         opts = _opts;
+        do_loop=true;
         animate();
     };
 
@@ -98,13 +99,18 @@
 
 
 		for (var i = 0; i < numCircles; i++) {
-            var f = typeof window.Dancer == 'undefined' ? 1 : window.Dancer.getFrequency(10,50)*100;
-            maxRad = 140 + (i+1*f)/numCircles*220;
+            var f = typeof window.Dancer == 'undefined' ? 1 : window.Dancer.getFrequency(10,50)*1000;
+            maxRad = 50 + (i+f)/numCircles*220;
             minRad = 50 + (0.85+0.15*f*i)/numCircles*220;
+            maxRad |= 0;
+            minRad |=0;
 
-			r = Math.floor(Math.random()*255);
-			g = Math.floor(Math.random()*255);
-			b = Math.floor(Math.random()*255);
+            r = window.Dancer.getFrequency(0,10)*1000|0;
+            g = window.Dancer.getFrequency(10,20)*1000|0;
+            b = window.Dancer.getFrequency(20,50)*1000|0;
+//			r = Math.floor(Math.random()*255);
+//			g = Math.floor(Math.random()*255);
+//			b = Math.floor(Math.random()*255);
 			//square-rooting the parameter moves the alpha towards transparent more rapidly.
 			a = startAlpha + (i/(numCircles-1))*(endAlpha - startAlpha);
 			var a0 = 0.67*a;

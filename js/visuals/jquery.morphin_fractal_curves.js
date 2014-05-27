@@ -28,6 +28,7 @@
     $.fractal_curves = function () {};
     $.fractal_curves.prototype.start = function (_opts) {
         opts = _opts;
+        do_loop=true;
         init();
         animate();
     };

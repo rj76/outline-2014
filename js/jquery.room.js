@@ -84,7 +84,7 @@
             num_images: 0,
             num_objects: 0,
             spy: {
-                speed: 4,
+                speed: 3,
                 time: 0.2,
                 num_images: 0,
                 num_objects: 0,
@@ -122,7 +122,7 @@
                 }
             },
             cat: {
-                speed: 4,
+                speed: 3,
                 time: 0.2,
                 num_images: 0,
                 num_objects: 0,
@@ -197,13 +197,14 @@
 
                     $canvas.on('switch_visual', function() {
                         visuals[current_visual].stop();
-                        current_visual = randomIntFromInterval(0, visuals.length-1);
+                        current_visual++;
+                        if (current_visual == visuals.length-1) current_visual = 0;
                         console.log('current_visual: '+current_visual);
                         doNextVisual();
                     });
 
                     $canvas.on('start_visuals', function() {
-                        current_visual = randomIntFromInterval(0, visuals.length-1);
+//                        current_visual = randomIntFromInterval(0, visuals.length-1);
                         console.log('current_visual: '+current_visual);
                         doNextVisual();
                     });
@@ -213,6 +214,7 @@
     };
 
     $.room.prototype.do_visual = function(idx) {
+        for(var i=0; i<visuals.length;i++) visuals[i].stop();
         current_visual = idx;
         doNextVisual();
     };
@@ -400,6 +402,9 @@
         // create room config
         active_config = choosable[randomIntFromInterval(0, choosable.length-1)];
 
+        $('#canv_visual0, #canv_visual1, #canv_visual2, #canv_visual3').hide();
+        $canvas.show();
+
         ctx.clearRect(0, 0, w, h);
 
         createRoom();
@@ -420,11 +425,14 @@
                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
                 }))
                 .then(function() {
+                        $canvas.hide();
+                        $('#canv_visual'+current_visual).show();
+                        var c = document.getElementById('canv_visual'+current_visual);
                         visuals[current_visual].start({
-                            w:w,
-                            h:h,
-                            ctx: ctx,
-                            canvas: canvas,
+                            w: c.width,
+                            h: c.height,
+                            ctx: c.getContext("2d"),
+                            canvas: c,
                             len: len,
                             wait: wait
                         });
