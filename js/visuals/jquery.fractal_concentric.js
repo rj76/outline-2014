@@ -109,9 +109,7 @@
             r = window.Dancer.getFrequency(0,10)*2550|0;
             g = window.Dancer.getFrequency(10,20)*2550|0;
             b = window.Dancer.getFrequency(20,50)*2550|0;
-//			r = Math.floor(Math.random()*255);
-//			g = Math.floor(Math.random()*255);
-//			b = Math.floor(Math.random()*255);
+
 			//square-rooting the parameter moves the alpha towards transparent more rapidly.
 			a = startAlpha + (i/(numCircles-1))*(endAlpha - startAlpha);
 			var a0 = 0.67*a;

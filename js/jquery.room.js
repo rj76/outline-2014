@@ -155,7 +155,15 @@
             'img/wall/pony.png',
             'img/wall/trolvis.jpg',
             'img/wall/ghunter.jpg',
-            'img/wall/alpacafluffy.jpg'
+            'img/wall/alpacafluffy.jpg',
+            'img/wall/Big_Bottom.jpg',
+            'img/wall/BLUEROOM.JPG',
+            'img/wall/close_up_12.jpg',
+            'img/wall/dancing_with_D.jpg',
+            'img/wall/lagaloise.jpg',
+            'img/wall/LULU_REV.JPG',
+            'img/wall/MARIA.JPG',
+            'img/wall/VISMES.JPG'
         ],
         props = {
             num_objects: 0,
@@ -178,7 +186,6 @@
     $.room.prototype.init = function () {
         // load images
         $.when(loadProps(), loadWallpapers(), loadSprites()).then(function() {
-            console.log('images loaded');
             Modernizr.load({
                 load: [
                     'js/sprite/Animation.js',
@@ -205,7 +212,6 @@
                     $canvas.on('switch_visual', function() {
                         canvas_visual = document.getElementById('canv_visual'+current_visual);
                         ctx_visual = canvas_visual.getContext("2d");
-                        console.log('current_visual: '+current_visual);
                         doVisual();
                         current_visual++;
                         if (current_visual == visuals.length-1) current_visual = 0;
@@ -1286,8 +1292,6 @@
                     { sprite: 'fr_3', time: sprites.cat.time }
             ], cat_spritesheet)
         ;
-
-        console.log('end spy_x: '+opts.spy_end_x+', end cat_x: '+opts.cat_end_x);
 
         function animate() {
             spy_animation.animate(timer.getSeconds());

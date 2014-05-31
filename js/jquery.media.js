@@ -21,82 +21,66 @@
                     dancer = new Dancer();
                     dancer
                         .onceAt(0, function() {
-                            console.log('start intro');
                             self.demo.$intro.start();
                         })
 
                         .onceAt(23.2, function() {
-                            console.log('end intro, start beat/room intro start (spy) 1/5')
                             $room_canvas.trigger('room_intro_plusplus');
                         })
                         .onceAt(23.2+step, function() {
-                            console.log('end intro, start beat/room intro start (cat) 2/5')
                             $room_canvas.trigger('room_intro_plusplus');
                         })
                         .onceAt(23.2+2*step, function() {
-                            console.log('end intro, start beat/room intro start (spy full) 3/5')
                             $room_canvas.trigger('room_intro_plusplus');
                         })
                         .onceAt(23.2+2.5*step, function() {
-                            console.log('end intro, start beat/room intro start (cat full) 4/5')
                             $room_canvas.trigger('room_intro_plusplus');
                         })
                         .onceAt(23.2+3*step, function() {
-                            console.log('end intro, start beat/room intro start (both and out)5/5')
                             $room_canvas.trigger('room_intro_plusplus');
                         })
 
                         .onceAt(46.3, function() {
-                            console.log('end intro, start tune1/triggering switch');
                             $room_canvas.trigger('switch_visual');
                         })
                         .onceAt(46.3+step*2, function() {
-                            console.log('triggering switch');
                             $room_canvas.trigger('stop_visual');
                             $room_canvas.trigger('switch_visual');
                         })
                         .onceAt(46.3+step*4, function() {
-                            console.log('end tune1, start tune2/triggering switch');
                             $room_canvas.trigger('stop_visual');
                             $room_canvas.trigger('switch_visual');
                         })
                         .onceAt(46.3+step*6, function() {
-                            console.log('triggering switch');
                             $room_canvas.trigger('stop_visual');
                             $room_canvas.trigger('switch_visual');
                         })
                         .onceAt(46.3+step*8, function() {
-                            console.log('end tune2, start tune3/triggering switch')
                             $room_canvas.trigger('stop_visual');
                             $room_canvas.trigger('switch_visual');
                         })
                         .onceAt(46.3+step*10, function() {
-                            console.log('triggering switch');
                             $room_canvas.trigger('stop_visual');
                             $room_canvas.trigger('switch_visual');
                         })
                         .onceAt(46.3+step*12, function() {
-                            console.log('end tune3, start tune4/triggering switch');
                             $room_canvas.trigger('stop_visual');
                             $room_canvas.trigger('switch_visual');
                         })
                         .onceAt(46.3+step*14, function() {
-                            console.log('triggering switch');
                             $room_canvas.trigger('stop_visual');
                             $room_canvas.trigger('switch_visual');
                         })
 
                         .onceAt(46.3+step*16, function() {
                             $room_canvas.trigger('stop_visual');
-                            console.log('end tune4, start outro1')
                             self.demo.$outro.start();
                         })
 
                         .onceAt(150.5, function() {
-                            console.log('end outro1, start outro2')
                         })
                         .onceAt(162.4, function() {
-                            console.log('end outro2')
+                            $('div.outro').fadeOut();
                         })
                         .load(audio)
                     ;
