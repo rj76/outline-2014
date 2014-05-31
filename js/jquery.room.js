@@ -3,6 +3,7 @@
         ctx = canvas.getContext("2d"),
         canvas_hidden = document.getElementById("canv_hidden_room"),
         ctx_hidden = canvas_hidden.getContext("2d"),
+        canvas_visual, ctx_visual,
         w = canvas.width,
         h = canvas.height,
         base_img,
@@ -182,13 +183,13 @@
                 load: [
                     'js/sprite/Animation.js',
                     'js/sprite/FrameTimer.js',
-                    'js/sprite/SpriteSheet.js',
+                    'js/sprite/SpriteSheet.js'
                 ],
                 complete: function() {
-                    visuals.push(new $.fractal_curves);
+                    visuals.push(new $.fractal_curves());
                     visuals.push(new $.fractal_concentric());
                     visuals.push(new $.plasma());
-                    visuals.push(new $.hgraph);
+                    visuals.push(new $.hgraph());
 
                     $canvas.on('room_intro_plusplus', function() {
                         $('#canv_intro').hide();
@@ -197,18 +198,17 @@
                         if (current_intro_step < intro_steps.length) intro_steps[current_intro_step++]();
                     });
 
-                    $canvas.on('switch_visual', function() {
+                    $canvas.on('stop_visual', function() {
                         visuals[current_visual].stop();
-                        current_visual++;
-                        if (current_visual == visuals.length-1) current_visual = 0;
-                        console.log('current_visual: '+current_visual);
-                        doNextVisual();
                     });
 
-                    $canvas.on('start_visuals', function() {
-//                        current_visual = randomIntFromInterval(0, visuals.length-1);
+                    $canvas.on('switch_visual', function() {
+                        canvas_visual = document.getElementById('canv_visual'+current_visual);
+                        ctx_visual = canvas_visual.getContext("2d");
                         console.log('current_visual: '+current_visual);
-                        doNextVisual();
+                        doVisual();
+                        current_visual++;
+                        if (current_visual == visuals.length-1) current_visual = 0;
                     });
                 }
             });
@@ -218,7 +218,7 @@
     $.room.prototype.do_visual = function(idx) {
         for(var i=0; i<visuals.length;i++) visuals[i].stop();
         current_visual = idx;
-        doNextVisual();
+        doVisual();
     };
 
     /*
@@ -226,8 +226,6 @@
      */
     intro_steps.push(function() {
         // 1) spy from left to center-10 or so, face front, show question mark, walk out
-        // deze duurt 5.75 @ 23.2
-        console.log('intro step 1');
         active_config = 'l';
         createRoom();
         createDoors();
@@ -252,8 +250,6 @@
 
     intro_steps.push(function() {
         // 2) cat from right to center-something, face front, show question mark, walk out
-        // deze duurt 5.75 @ 28,95
-        console.log('intro step 2');
         active_config = 'l';
         createRoom();
         createDoors();
@@ -278,8 +274,6 @@
 
     intro_steps.push(function() {
         // 3) spy moves through room w/ paintings, left to right
-        // deze duurt 2.875 @ 31,825
-        console.log('intro step 3');
         active_config = 'lr';
 
         createRoom();
@@ -305,8 +299,6 @@
 
     intro_steps.push(function () {
         // 4) cat moves through room w/ paintings, right to left
-        // deze duurt 2.875 @ 34,7
-        console.log('intro step 4');
         active_config = 'rl';
 
         createRoom();
@@ -332,8 +324,6 @@
 
     intro_steps.push(function () {
         // 5) spy from left, cat from right, they meet: love, they both walk out
-        // deze duurt 5.75 + 2.875 @ 43,325
-        console.log('intro step 5');
         active_config = 'spy-l-cat-r';
         var spy_cat_img;
 
@@ -390,9 +380,9 @@
                                     ctx: ctx, el: canvas, x: 0, y: 0, w: w, h: h
                                 });
                             });
-                        }, 1000);
-                    }, 1000);
-                }, 1000);
+                        }, 500);
+                    }, 500);
+                }, 500);
             });
         });
     });
@@ -400,9 +390,9 @@
     /*
         Visuals
      */
-    function doNextVisual() {
+    function doVisual() {
         // create room config
-        active_config = choosable[randomIntFromInterval(0, choosable.length-1)];
+        active_config = choosable[window.demo.randomIntFromInterval(0, choosable.length-1)];
 
         $('#canv_visual0, #canv_visual1, #canv_visual2, #canv_visual3').hide();
         $canvas.show();
@@ -520,7 +510,7 @@
         ctx.lineWidth = line_width;
 
         ctx.strokeStyle = '#000';
-        ctx.fillStyle = colors[randomIntFromInterval(0, colors.length-1)];
+        ctx.fillStyle = colors[window.demo.randomIntFromInterval(0, colors.length-1)];
         ctx.beginPath();
         moveOrDrawCoords(coords_fill);
         moveOrDrawCoords(coords_innerlines);
@@ -536,10 +526,6 @@
                 ctx.lineTo(coords[p].x*zoom+offset_left, coords[p].y*zoom+top);
             }
         }
-    }
-
-    function randomIntFromInterval(min, max) {
-        return Math.floor(Math.random()*(max-min+1)+min);
     }
 
     /*
@@ -584,7 +570,7 @@
             // adjust height to this factor and place image in center
             //
             var
-                new_width = randomIntFromInterval(width_x_min, width_x_max)
+                new_width = window.demo.randomIntFromInterval(width_x_min, width_x_max)
             ;
             ratio = new_width/img.width;
             img_x = offset_left+offset_x+(width_x_max/2-new_width/2);
@@ -595,7 +581,7 @@
         if (mode == 'p') {
             // height can't be bigger than 1.5*zoom
             var
-                new_height = randomIntFromInterval(height_y_min, height_y_max)
+                new_height = window.demo.randomIntFromInterval(height_y_min, height_y_max)
             ;
             ratio = new_height/img.height;
             img_y = offset_y+1.8*zoom+(height_y_max/2-new_height/2);
@@ -705,7 +691,7 @@
                 // move from left door to center and back
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
-                end_x = offset_left+(doors.right.sprite.x*zoom)/2-20;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2|0;
                 speed = sprites.spy.speed;
                 $.when(moveSpyRight({
                     x: x,
@@ -716,42 +702,11 @@
                 .then(function() {
                     // insert question mark sprite for 1 second or so
                     $.when(showQuestionmark({
-                        x: offset_left+(doors.right.sprite.x*zoom)/2-30,
+                        x: offset_left+(doors.right.sprite.x*zoom)/2+10|0,
                         y: top+(doors.left.sprite.y*zoom)-50
                     }))
                     .then(function() {
                         $.when(moveSpyLeft({
-                            x: end_x,
-                            end_x: x,
-                            y: y,
-                            speed: speed
-                        }))
-                        .then(function() {
-                            d.resolve();
-                        });
-                    });
-                });
-                break;
-            case 'r':
-                // move from right door to center and back
-                x = doors.right.sprite.x*zoom+offset_left;
-                y = top+doors.right.sprite.y*zoom;
-                end_x = offset_left+(doors.left.sprite.x*zoom)/2+40;
-                speed = sprites.spy.speed;
-                $.when(moveSpyLeft({
-                    x: x,
-                    end_x: end_x,
-                    y: y,
-                    speed: speed
-                }))
-                .then(function() {
-                    // insert question mark sprite for 1 second or so
-                    $.when(showQuestionmark({
-                        x: offset_left+(doors.right.sprite.x*zoom)/2-20,
-                        y: top+(doors.left.sprite.y*zoom)-50
-                    }))
-                    .then(function() {
-                        $.when(moveSpyRight({
                             x: end_x,
                             end_x: x,
                             y: y,
@@ -1025,8 +980,8 @@
                 // move from left door to center and back
                 x = doors.left.sprite.x*zoom+offset_left;
                 y = top+doors.left.sprite.y*zoom;
-                end_x = offset_left+(doors.right.sprite.x*zoom)/2-20;
-                speed = sprites.cat.speed_fast;
+                end_x = offset_left+(doors.right.sprite.x*zoom)/2;
+                speed = sprites.cat.speed;
                 $.when(moveCatRight({
                     x: x,
                     end_x: end_x,
@@ -1036,7 +991,7 @@
                 .then(function() {
                     // insert question mark sprite for 1 second or so
                     $.when(showQuestionmark({
-                        x: offset_left+(doors.right.sprite.x*zoom)/2-30,
+                        x: offset_left+(doors.right.sprite.x*zoom)/2+30|0,
                         y: top+(doors.left.sprite.y*zoom)-50
                     }))
                     .then(function() {
@@ -1049,31 +1004,6 @@
                         .then(function() {
                             d.resolve();
                         });
-                    });
-                });
-                break;
-            case 'r':
-                // move from right door to center and back
-                x = doors.right.sprite.x*zoom+offset_left;
-                y = top+doors.right.sprite.y*zoom;
-                end_x = offset_left+(doors.right.sprite.x*zoom)/2;
-                speed = sprites.cat.speed_fast;
-                $.when(moveCatLeft({
-                    x: x,
-                    end_x: end_x,
-                    y: y,
-                    speed: speed
-                }))
-                .then(function() {
-                    // insert question mark sprite for 1 second or so
-                    $.when(moveCatRight({
-                        x: end_x,
-                        end_x: x,
-                        y: y,
-                        speed: speed
-                    }))
-                    .then(function() {
-                        d.resolve();
                     });
                 });
                 break;
@@ -1154,7 +1084,7 @@
                 y = top+doors.left.sprite.y*zoom;
                 end_x = offset_left+doors.back_right.sprite.x*zoom;
                 end_y = doors.back_right.sprite.y*zoom;
-                speed = sprites.cat.speed;
+                speed = sprites.cat.speed_fast;
                 $.when(moveCatRight({
                         x: x,
                         end_x: end_x,

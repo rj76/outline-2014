@@ -15,11 +15,11 @@
         texts = [
             "G'day fellow outliners!",
             "This small demo",
-            "is a tribute to the game I used to love.",
+            "is a tribute to a game I used to love.",
             "html5 canvas fun",
             "or so it should be..."
         ],
-        wait=18/texts.length,
+        wait=16/texts.length,
         txt_idx= 0,
         alpha
     ;

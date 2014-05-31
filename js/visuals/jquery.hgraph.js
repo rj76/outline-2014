@@ -16,6 +16,10 @@
 
     function animate() {
         if (do_loop) {
+            d1 = window.Dancer.getFrequency(0,10);
+            d2 = window.Dancer.getFrequency(10,20);
+            d3 = window.Dancer.getFrequency(30,50);
+            d4 = window.Dancer.getFrequency(50,100)
             randomHarmonograph();
             requestAnimationFrame(animate, opts.canvas);
         }
@@ -35,10 +39,15 @@
     }
 
     function randomHarmonograph() {
-        f1 = (f1 + Math.random() / 40) % 10;
-        f2 = (f2 + Math.random() / 40) % 10;
-        f3 = (f3 + Math.random() / 40) % 10;
-        f4 = (f4 + Math.random() / 40) % 10;
+//        f1 = (f1 + Math.random() / 40) % 10;
+//        f2 = (f2 + Math.random() / 40) % 10;
+//        f3 = (f3 + Math.random() / 40) % 10;
+//        f4 = (f4 + Math.random() / 40) % 10;
+        f1 = (f1 + window.Dancer.getFrequency(0,10)*1000 / 40) % 10;
+        f2 = (f2 + window.Dancer.getFrequency(10,20)*1000 / 40) % 10;
+        f3 = (f3 + window.Dancer.getFrequency(20,30)*1000 / 40) % 10;
+        f4 = (f4 + window.Dancer.getFrequency(40,100)*1000 / 40) % 10;
+
         p1 += 0.05 % (Math.PI * 2)
         drawHarmonograph();
     }
@@ -51,9 +60,9 @@
         opts.ctx.fillRect(0, 0, opts.w, opts.h);
         opts.ctx.translate(opts.w/2, opts.h/2);
         opts.ctx.beginPath();
-        for (var t = 0; t < 100; t += 0.01) {
-            var x = A1 * Math.sin(f1 * t + Math.PI * p1) * Math.exp(-d1 * t) + A2 * Math.sin(f2 * t + Math.PI * p2) * Math.exp(-d2 * t) * window.Dancer.getFrequency(10,50)*100;
-            var y = A3 * Math.sin(f3 * t + Math.PI * p3) * Math.exp(-d3 * t) + A4 * Math.sin(f4 * t + Math.PI * p4) * Math.exp(-d4 * t) * window.Dancer.getFrequency(10,50)*100;
+        for (var t = 0; t < 100; t += window.Dancer.getFrequency(0,10)) {
+            var x = A1 * Math.sin(f1 * t + Math.PI * p1) * Math.exp(-d1 * t) + A2 * Math.sin(f2 * t + Math.PI * p2) * Math.exp(-d2 * t);
+            var y = A3 * Math.sin(f3 * t + Math.PI * p3) * Math.exp(-d3 * t) + A4 * Math.sin(f4 * t + Math.PI * p4) * Math.exp(-d4 * t);
             opts.ctx.lineTo(x, y);
         }
         opts.ctx.stroke();

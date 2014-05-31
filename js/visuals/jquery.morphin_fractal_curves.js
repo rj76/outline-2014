@@ -173,8 +173,8 @@
 		var linParam;
 		var cosParam;
 		var centerX, centerY;
-		var xSqueeze = Math.random()*1.5;
-//        var xSqueeze = window.Dancer.getFrequency(10,50)*100;
+//		var xSqueeze = Math.random()*1.5;
+        var xSqueeze = window.Dancer.getFrequency(10,50)*100;
 		var x0,y0;
 		var rad, rad0, rad1;
 		var phase, phase0, phase1;

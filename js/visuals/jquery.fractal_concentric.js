@@ -7,6 +7,7 @@
     $.fractal_concentric = function() {};
     $.fractal_concentric.prototype.start = function (_opts) {
         opts = _opts;
+        opts.ctx.clearRect(0, 0, opts.w, opts.h);
         do_loop=true;
         animate();
     };
@@ -41,7 +42,7 @@
 				dx = nextPoint.x - point.x;
 				newX = 0.5*(point.x + nextPoint.x);
 				newY = 0.5*(point.y + nextPoint.y);
-				newY += dx*(Math.random()*2 - 1);
+				newY += dx*(window.Dancer.getFrequency(0, 10)*1000-1);
 
 				var newPoint = {x:newX, y:newY};
 
@@ -99,15 +100,15 @@
 
 
 		for (var i = 0; i < numCircles; i++) {
-            var f = typeof window.Dancer == 'undefined' ? 1 : window.Dancer.getFrequency(10,50)*1000;
-            maxRad = 50 + (i+f)/numCircles*220;
-            minRad = 50 + (0.85+0.15*f*i)/numCircles*220;
+            var f = typeof window.Dancer == 'undefined' ? 1 : window.Dancer.getFrequency(0,10)*100;
+            maxRad = window.demo.randomIntFromInterval(1*f|0, 10*f|0) + (i+f)/numCircles*220;
+            minRad = window.demo.randomIntFromInterval(1*f|0, 10*f|0) + (0.85+0.15*f*i)/numCircles*220;
             maxRad |= 0;
             minRad |=0;
 
-            r = window.Dancer.getFrequency(0,10)*1000|0;
-            g = window.Dancer.getFrequency(10,20)*1000|0;
-            b = window.Dancer.getFrequency(20,50)*1000|0;
+            r = window.Dancer.getFrequency(0,10)*2550|0;
+            g = window.Dancer.getFrequency(10,20)*2550|0;
+            b = window.Dancer.getFrequency(20,50)*2550|0;
 //			r = Math.floor(Math.random()*255);
 //			g = Math.floor(Math.random()*255);
 //			b = Math.floor(Math.random()*255);
@@ -123,7 +124,7 @@
 			grad.addColorStop(1,color1);
 			opts.ctx.fillStyle = grad;
 
-			phase = Math.random()*Math.PI*2;
+			phase = window.Dancer.getFrequency(0,10)*10*Math.PI*2;
 
 			drawCircle(centerX, centerY, minRad, maxRad, phase, color1, grad);
 		}

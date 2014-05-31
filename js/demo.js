@@ -1,4 +1,8 @@
 (function ($) {
+    $('div.canvas canvas').each(function(idx, el) {
+        $(this).css('left', ($(window).width()/2)-($(this).width()/2)+'px');
+    });
+
     $.randomize = function (arr) {
         for (var j, x, i = arr.length; i; j = parseInt(Math.random() * i), x = arr[--i], arr[i] = arr[j], arr[j] = x);
         return arr;
@@ -14,6 +18,10 @@
         this.$room = new $.room();
         this.$outro = new $.outro(this);
         this.$room.init();
+    };
+
+    $.demo.prototype.randomIntFromInterval = function(min, max) {
+        return Math.floor(Math.random()*(max-min+1)+min);
     };
 
     $.demo.prototype.run = function () {

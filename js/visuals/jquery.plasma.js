@@ -26,8 +26,8 @@
         do_loop = true;
         opts = _opts;
         g_canvas = opts.canvas;
-        WIDTH = g_canvas.width;// = window.innerWidth;
-        HEIGHT = g_canvas.height;// = window.innerHeight;
+        WIDTH = g_canvas.width;
+        HEIGHT = g_canvas.height;
 
         // create the Plasma object
         g_plasma = new Plasma();
